@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Delegates to the repository's canonical commit-msg hook.
+#
+# bd sets core.hooksPath to .beads/hooks (for its own pre-commit/post-merge/etc.
+# hooks), so this directory is the one Git actually runs. The rules themselves
+# live in .githooks/commit-msg so there is a single source of truth: a fresh
+# clone that only runs `git config core.hooksPath .githooks` gets exactly the
+# same checks, and the two can never drift apart.
+exec "$(git rev-parse --show-toplevel)/.githooks/commit-msg" "$@"

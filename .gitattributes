@@ -1,0 +1,17 @@
+# Line-ending and text normalization: the repository stores text as LF on all
+# platforms (the Node/Vue convention, unlike the C# project's CRLF).
+
+* text=auto eol=lf
+
+# Shell scripts and git hooks must keep LF or they fail to execute.
+*.sh text eol=lf
+.githooks/* text eol=lf
+.beads/hooks/* text eol=lf
+
+# Binary assets are never normalized.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary

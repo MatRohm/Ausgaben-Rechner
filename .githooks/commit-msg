@@ -1,0 +1,95 @@
+#!/bin/sh
+#
+# commit-msg hook: enforce the repository's commit message rules.
+#
+# Two rules, both checked against the subject (the first line):
+#
+#   1. Conventional Commits 1.0.0 - the subject reads
+#
+#          <type>[(scope)][!]: <description>
+#
+#      where <type> is one of the allowed types below, the scope is optional and
+#      non-empty, the description is non-empty, and an optional breaking-change
+#      marker (!) may appear after the type/scope.
+#
+#   2. The subject ends with the tracked issue's id, e.g.
+#
+#          feat: show the week view as a tree (ausgaben-a3f2dd)
+#
+#      The id may be bare or wrapped in one closing bracket/paren.
+#
+# Git-generated merge and revert messages are exempt, and an emergency bypass is
+# available with `git commit --no-verify`.
+#
+# See https://www.conventionalcommits.org/en/v1.0.0/ and README.md ("Git hooks").
+
+set -eu
+
+message_file=$1
+
+# Issue prefix used by bd for this repository (`issue_prefix` in `.beads/`).
+issue_prefix='ausgaben'
+
+# Allowed Conventional Commits types.
+types='build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test'
+
+# Comment lines (#...) and leading blank lines are ignored by Git; drop them
+# before reading the subject so `git commit -m` and editor commits behave alike.
+# Trailing blanks/newlines are trimmed so the issue-id check can anchor on `$`.
+subject=$(
+    sed -e '/^#/d' -e '/^[[:space:]]*$/d' "$message_file" | head -n 1 |
+        sed -e 's/[[:space:]]*$//'
+)
+
+# Empty message (e.g. an aborted editor commit) is not ours to police.
+[ -n "$subject" ] || exit 0
+
+# Let Git-generated merge and revert messages through. `git revert` writes
+# "Revert \"...\"" and a revert that follows the convention types it itself, so
+# neither needs policing here.
+case "$subject" in
+    "Merge "* | "Revert "*) exit 0 ;;
+esac
+
+if ! printf '%s' "$subject" |
+    grep -Eq "^($types)(\([^()]+\))?!?: .+$"; then
+    cat >&2 <<EOF
+✗ Commit message does not follow Conventional Commits.
+
+  Got:      $subject
+  Expected: <type>[optional scope][!]: <description>
+
+  Allowed types: $(printf '%s' "$types" | tr '|' ' ')
+  Examples:
+    feat: add a per-item editor for tracking entries (ausgaben-a3f2dd)
+    fix(settlement): stop counting paid expenses (ausgaben-9k2c1a)
+
+  See README.md ("Git hooks") and
+  https://www.conventionalcommits.org/en/v1.0.0/
+  (use "git commit --no-verify" to bypass in an emergency)
+
+EOF
+    exit 1
+fi
+
+# Rule 2: the tracked issue id at the end of the subject (bare, or one closing
+# bracket/paren). `bd ready` / `bd list` show the ids. The bracket class puts `]`
+# first so it is taken literally.
+if ! printf '%s' "$subject" |
+    grep -Eiq "${issue_prefix}-[a-z0-9]+[])]?$"; then
+    cat >&2 <<EOF
+✗ Commit message does not reference a ${issue_prefix} issue id.
+
+  Got:      $subject
+  Expected: the subject to end with the issue id, e.g.
+                feat: show the week view as a tree (${issue_prefix}-a3f2dd)
+
+  Find the id with 'bd ready' / 'bd list' (create one with 'bd create').
+  The id must be at the end of the subject; use "git commit --no-verify" only
+  in an emergency.
+
+EOF
+    exit 1
+fi
+
+exit 0

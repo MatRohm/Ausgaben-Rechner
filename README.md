@@ -72,6 +72,22 @@ docker run -d \
   ghcr.io/<owner>/<repo>:latest
 ```
 
+## Mitwirken
+
+- **Aufgaben** werden mit [beads](https://github.com/gastownhall/beads) verfolgt
+  (`bd ready`, `bd create`, `bd close`).
+- **Commit-Messages** folgen [Conventional Commits](https://www.conventionalcommits.org/)
+  und enden mit der Issue-ID, z. B. `feat: Wochenansicht als Baum (ausgaben-a3f2dd)`.
+  Ein `commit-msg`-Hook erzwingt das; einmal pro Klon aktivieren:
+
+  ```sh
+  git config core.hooksPath .beads/hooks   # mit bd installiert (führt auch dessen Hooks aus)
+  git config core.hooksPath .githooks      # ohne bd
+  ```
+
+- Anweisungen für KI-Agenten (Claude Code und opencode) liegen in
+  `.claude/CLAUDE.md` (über den Symlink `AGENTS.md` erreichbar).
+
 ## Konfiguration (Umgebungsvariablen)
 
 | Variable  | Standard  | Beschreibung                          |
