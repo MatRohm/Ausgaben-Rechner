@@ -25,6 +25,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Contract check
+        run: npm run contracts:check
+
       - name: Architecture check
         run: npm run arch:check
 

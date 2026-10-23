@@ -1,8 +1,3 @@
-export interface Settle {
-  id: number;
-  name: string;
-  createdAt: string;
-  closedAt: string | null;
-  expenseCount: number;
-  totalCents: number;
-}
+import type { components } from '@/shared/api-types';
+
+export type Settle = components['schemas']['Settle'];

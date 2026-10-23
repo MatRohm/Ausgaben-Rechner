@@ -88,6 +88,11 @@ on:
 - `service.ts` importing Express;
 - `types.ts` importing Express or better-sqlite3.
 
+`npm run contracts:check` recomputes the client types from
+`contracts/openapi.yaml` and fails when the committed file is stale.
+`server/tests/contracts.test.ts` validates the spec and every documented response
+body against it.
+
 The rules are defined in `.dependency-cruiser.cjs` (with per-workspace
 TypeScript resolution in `.dependency-cruiser.client.cjs` and
 `.dependency-cruiser.server.cjs`); the path patterns are the source of truth, so
@@ -112,10 +117,12 @@ complexity than value for this repository:
   the `expenses` module. Keeping the join here avoids a `settles → expenses`
   dependency, which would create a module cycle. If this grows, extract a
   read model outside both modules.
-- **Hand-maintained REST DTOs:** the client duplicates the REST response shapes
-  in its own module `types.ts` files. They are small and deliberately
-  implementation-independent. OpenAPI generation/contract tests are a
-  follow-up, not part of the current enforcement.
+- **Generated REST types:** the client consumes `contracts/openapi.yaml` through
+  generated types in `client/src/shared/api-types.ts`; the module `types.ts`
+  files alias the generated schemas. The server keeps its own internal types,
+  and `server/tests/contracts.test.ts` validates real responses against the
+  published contract. Regenerate with `npm run contracts:generate`; CI fails if
+  the committed types are stale.
 - **No formatter/linter yet:** type checking, dependency-cruiser, tests, and the
   production build are the automated gates. ESLint can be added later without
   changing the module layout.
@@ -123,9 +130,11 @@ complexity than value for this repository:
 ## REST boundary
 
 The server exposes `/api/persons`, `/api/settles`, `/api/expenses`, and
-`/api/settlement`. These paths and their payload shapes are the contract. The
-client never imports server source; the server's `index.ts` files export
-application functions and routers, not DTOs intended for the client bundle.
+`/api/settlement`. Their paths and payload shapes live in
+`contracts/openapi.yaml`; see `contracts/README.md` for the generation and
+contract-test workflow. The client never imports server source; the server's
+`index.ts` files export application functions and routers, not DTOs intended for
+the client bundle.
 
 ## Adding a module
 
@@ -140,9 +149,10 @@ application functions and routers, not DTOs intended for the client bundle.
 ## Running the checks
 
 ```bash
-npm run typecheck    # vue-tsc + tsc --noEmit
-npm run arch:check   # dependency-cruiser for client and server
-npm test             # Vitest unit + REST integration tests
-npm run build        # production build of both workspaces
-npm run verify       # all of the above, in CI order
+npm run typecheck         # vue-tsc + tsc --noEmit
+npm run contracts:check   # regenerate client types and reject stale output
+npm run arch:check        # dependency-cruiser for client and server
+npm test                  # unit, integration, and OpenAPI contract tests
+npm run build             # production build of both workspaces
+npm run verify            # all of the above, in CI order
 ```

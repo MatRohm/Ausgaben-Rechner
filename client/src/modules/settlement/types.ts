@@ -1,23 +1,5 @@
-import type { Expense } from '@/modules/expenses';
+import type { components } from '@/shared/api-types';
 
-export interface SettlementBalance {
-  personId: number;
-  name: string;
-  paidCents: number;
-  owedCents: number;
-  balanceCents: number;
-}
-
-export interface SettlementTransfer {
-  fromPersonId: number;
-  fromName: string;
-  toPersonId: number;
-  toName: string;
-  amountCents: number;
-}
-
-export interface SettlementResult {
-  balances: SettlementBalance[];
-  transfers: SettlementTransfer[];
-  settledExpenses: Expense[];
-}
+export type SettlementBalance = components['schemas']['SettlementBalance'];
+export type SettlementTransfer = components['schemas']['SettlementTransfer'];
+export type SettlementResult = components['schemas']['SettlementResult'];

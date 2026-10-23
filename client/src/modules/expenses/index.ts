@@ -1,4 +1,8 @@
-export type { Expense, ExpenseDraft, ExpenseParticipant } from './types';
-export type { ExpenseInput } from './api';
+export type {
+  Expense,
+  ExpenseDraft,
+  ExpenseInput,
+  ExpenseParticipant,
+} from './types';
 export { expensesApi } from './api';
 export { default as ExpensesView } from './ExpensesView.vue';

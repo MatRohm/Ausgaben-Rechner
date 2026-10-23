@@ -15,14 +15,20 @@
     "start": "npm run start -w server",
     "typecheck": "npm run typecheck -w client && npm run typecheck -w server",
     "test": "vitest run",
+    "contracts:generate": "openapi-typescript contracts/openapi.yaml -o client/src/shared/api-types.ts",
+    "contracts:check": "node scripts/check-api-types.mjs",
     "arch:check": "npm run arch:check:client && npm run arch:check:server",
     "arch:check:client": "depcruise client/src -c .dependency-cruiser.client.cjs",
     "arch:check:server": "depcruise server/src -c .dependency-cruiser.server.cjs",
-    "verify": "npm run typecheck && npm run arch:check && npm test && npm run build"
+    "verify": "npm run typecheck && npm run contracts:check && npm run arch:check && npm test && npm run build"
   },
   "devDependencies": {
+    "@apidevtools/swagger-parser": "^13.1.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "concurrently": "^9.1.0",
     "dependency-cruiser": "^18.7.0",
+    "openapi-typescript": "^7.13.0",
     "vitest": "^5.0.5"
   },
   "engines": {

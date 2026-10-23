@@ -1,9 +1,5 @@
 import { request } from '@/shared/http';
-import type { Expense, ExpenseDraft } from './types';
-
-export interface ExpenseInput extends ExpenseDraft {
-  settleId: number;
-}
+import type { Expense, ExpenseInput } from './types';
 
 export const expensesApi = {
   list: (settleId?: number) =>

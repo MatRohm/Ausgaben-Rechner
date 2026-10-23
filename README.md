@@ -48,12 +48,16 @@ npm run dev
 Die gleichen Prüfungen laufen in der CI (`.github/workflows/ci.yml`):
 
 ```bash
-npm run typecheck    # Vue- und Server-TypeScript
-npm run arch:check   # Modulgrenzen und Abhängigkeitsrichtung
-npm test             # Unit- und API-Integrationstests
-npm run build        # Produktions-Build beider Workspaces
-npm run verify       # alles in CI-Reihenfolge
+npm run typecheck         # Vue- und Server-TypeScript
+npm run contracts:check   # OpenAPI-Typen neu generieren und auf Aktualität prüfen
+npm run arch:check        # Modulgrenzen und Abhängigkeitsrichtung
+npm test                  # Unit-, Integrations- und Contract-Tests
+npm run build             # Produktions-Build beider Workspaces
+npm run verify            # alles in CI-Reihenfolge
 ```
+
+Der REST-Vertrag liegt in `contracts/openapi.yaml`; Details zur Generierung
+und zu den Contract-Tests stehen in `contracts/README.md`.
 
 ## Produktion (Docker)
 

@@ -1,0 +1,649 @@
+openapi: 3.1.0
+info:
+  title: Ausgaben-Rechner API
+  version: 1.0.0
+  description: >-
+    REST contract between the Vue client and the Express server. The client
+    consumes these schemas through generated TypeScript types; contract tests
+    validate real responses against them.
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+tags:
+  - name: system
+    description: Health and operational endpoints
+  - name: persons
+    description: People who pay for and share expenses
+  - name: settles
+    description: Settlements (Abrechnungen) and their lifecycle
+  - name: expenses
+    description: Expenses, payers, participants, and paid state
+  - name: settlement
+    description: Balance and transfer calculation
+paths:
+  /api/health:
+    get:
+      operationId: getHealth
+      tags:
+        - system
+      summary: Liveness check
+      responses:
+        '200':
+          description: Server is running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+
+  /api/persons:
+    get:
+      operationId: listPersons
+      tags:
+        - persons
+      summary: List all persons
+      responses:
+        '200':
+          description: Persons sorted by name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Person'
+    post:
+      operationId: createPerson
+      tags:
+        - persons
+      summary: Create a person
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonName'
+      responses:
+        '201':
+          description: Person created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/persons/{id}:
+    parameters:
+      - $ref: '#/components/parameters/PersonId'
+    patch:
+      operationId: renamePerson
+      tags:
+        - persons
+      summary: Rename a person
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonName'
+      responses:
+        '200':
+          description: Person renamed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      operationId: deletePerson
+      tags:
+        - persons
+      summary: Delete a person and their expenses
+      responses:
+        '204':
+          description: Person deleted
+
+  /api/settles:
+    get:
+      operationId: listSettles
+      tags:
+        - settles
+      summary: List all settlements
+      responses:
+        '200':
+          description: Settlements, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Settle'
+    post:
+      operationId: createSettle
+      tags:
+        - settles
+      summary: Create a settlement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettleName'
+      responses:
+        '201':
+          description: Settlement created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/settles/{id}:
+    parameters:
+      - $ref: '#/components/parameters/SettleId'
+    patch:
+      operationId: renameSettle
+      tags:
+        - settles
+      summary: Rename a settlement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettleName'
+      responses:
+        '200':
+          description: Settlement renamed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      operationId: deleteSettle
+      tags:
+        - settles
+      summary: Delete a settlement and its expenses
+      responses:
+        '204':
+          description: Settlement deleted
+
+  /api/settles/{id}/close:
+    parameters:
+      - $ref: '#/components/parameters/SettleId'
+    post:
+      operationId: closeSettle
+      tags:
+        - settles
+      summary: Freeze a settlement
+      responses:
+        '200':
+          description: Settlement closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settle'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/settles/{id}/reopen:
+    parameters:
+      - $ref: '#/components/parameters/SettleId'
+    post:
+      operationId: reopenSettle
+      tags:
+        - settles
+      summary: Reopen a frozen settlement
+      responses:
+        '200':
+          description: Settlement reopened
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settle'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/expenses:
+    get:
+      operationId: listExpenses
+      tags:
+        - expenses
+      summary: List expenses, optionally filtered by settlement
+      parameters:
+        - name: settleId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Expenses, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Expense'
+    post:
+      operationId: createExpense
+      tags:
+        - expenses
+      summary: Create an expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseInput'
+      responses:
+        '201':
+          description: Expense created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /api/expenses/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ExpenseId'
+    patch:
+      operationId: updateExpense
+      tags:
+        - expenses
+      summary: Update an expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseInput'
+      responses:
+        '200':
+          description: Expense updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: deleteExpense
+      tags:
+        - expenses
+      summary: Delete an expense
+      responses:
+        '204':
+          description: Expense deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/expenses/{id}/settled:
+    parameters:
+      - $ref: '#/components/parameters/ExpenseId'
+    patch:
+      operationId: setExpenseSettled
+      tags:
+        - expenses
+      summary: Mark an expense as paid or unpaid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettledInput'
+      responses:
+        '200':
+          description: Expense updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/settlement/{settleId}:
+    parameters:
+      - $ref: '#/components/parameters/SettlementSettleId'
+    get:
+      operationId: computeSettlement
+      tags:
+        - settlement
+      summary: Compute balances and transfers for a settlement
+      responses:
+        '200':
+          description: Settlement result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettlementResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+components:
+  parameters:
+    PersonId:
+      name: id
+      in: path
+      required: true
+      description: Person id
+      schema:
+        type: integer
+    SettleId:
+      name: id
+      in: path
+      required: true
+      description: Settlement id
+      schema:
+        type: integer
+    ExpenseId:
+      name: id
+      in: path
+      required: true
+      description: Expense id
+      schema:
+        type: integer
+    SettlementSettleId:
+      name: settleId
+      in: path
+      required: true
+      description: Settlement id
+      schema:
+        type: integer
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: A resource with the same name already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Health:
+      type: object
+      additionalProperties: false
+      required:
+        - ok
+      properties:
+        ok:
+          type: boolean
+
+    Error:
+      type: object
+      additionalProperties: false
+      required:
+        - error
+      properties:
+        error:
+          type: string
+
+    Person:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+
+    PersonName:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+
+    Settle:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+        - createdAt
+        - closedAt
+        - expenseCount
+        - totalCents
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        createdAt:
+          type: string
+          description: SQLite datetime (UTC)
+        closedAt:
+          type:
+            - string
+            - 'null'
+          description: SQLite datetime (UTC) or null while the settle is open
+        expenseCount:
+          type: integer
+          minimum: 0
+        totalCents:
+          type: integer
+          minimum: 0
+
+    SettleName:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+
+    ExpenseParticipant:
+      type: object
+      additionalProperties: false
+      required:
+        - personId
+        - weight
+        - name
+      properties:
+        personId:
+          type: integer
+        weight:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+
+    ExpenseParticipantInput:
+      type: object
+      additionalProperties: false
+      required:
+        - personId
+        - weight
+      properties:
+        personId:
+          type: integer
+        weight:
+          type: integer
+          minimum: 1
+
+    Expense:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - description
+        - amountCents
+        - paidById
+        - paidByName
+        - settleId
+        - date
+        - settled
+        - createdAt
+        - participants
+      properties:
+        id:
+          type: integer
+        description:
+          type: string
+        amountCents:
+          type: integer
+          minimum: 1
+        paidById:
+          type: integer
+        paidByName:
+          type: string
+        settleId:
+          type: integer
+        date:
+          type: string
+          format: date
+        settled:
+          type: boolean
+        createdAt:
+          type: string
+          description: SQLite datetime (UTC)
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExpenseParticipant'
+
+    ExpenseInput:
+      type: object
+      additionalProperties: false
+      required:
+        - description
+        - amountCents
+        - paidById
+        - settleId
+        - date
+        - participants
+      properties:
+        description:
+          type: string
+          minLength: 1
+        amountCents:
+          type: integer
+          minimum: 1
+        paidById:
+          type: integer
+        settleId:
+          type: integer
+        date:
+          type: string
+          format: date
+        participants:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ExpenseParticipantInput'
+
+    SettledInput:
+      type: object
+      additionalProperties: false
+      required:
+        - settled
+      properties:
+        settled:
+          type: boolean
+
+    SettlementBalance:
+      type: object
+      additionalProperties: false
+      required:
+        - personId
+        - name
+        - paidCents
+        - owedCents
+        - balanceCents
+      properties:
+        personId:
+          type: integer
+        name:
+          type: string
+        paidCents:
+          type: integer
+        owedCents:
+          type: integer
+        balanceCents:
+          type: integer
+
+    SettlementTransfer:
+      type: object
+      additionalProperties: false
+      required:
+        - fromPersonId
+        - fromName
+        - toPersonId
+        - toName
+        - amountCents
+      properties:
+        fromPersonId:
+          type: integer
+        fromName:
+          type: string
+        toPersonId:
+          type: integer
+        toName:
+          type: string
+        amountCents:
+          type: integer
+          minimum: 1
+
+    SettlementResult:
+      type: object
+      additionalProperties: false
+      required:
+        - balances
+        - transfers
+        - settledExpenses
+      properties:
+        balances:
+          type: array
+          items:
+            $ref: '#/components/schemas/SettlementBalance'
+        transfers:
+          type: array
+          items:
+            $ref: '#/components/schemas/SettlementTransfer'
+        settledExpenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Expense'

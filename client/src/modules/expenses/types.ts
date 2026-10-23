@@ -1,26 +1,6 @@
-export interface ExpenseParticipant {
-  personId: number;
-  weight: number;
-  name?: string;
-}
+import type { components } from '@/shared/api-types';
 
-export interface Expense {
-  id: number;
-  description: string;
-  amountCents: number;
-  paidById: number;
-  paidByName?: string;
-  settleId: number;
-  date: string;
-  settled: boolean;
-  createdAt: string;
-  participants: ExpenseParticipant[];
-}
-
-export interface ExpenseDraft {
-  description: string;
-  amountCents: number;
-  paidById: number;
-  date: string;
-  participants: { personId: number; weight: number }[];
-}
+export type ExpenseParticipant = components['schemas']['ExpenseParticipant'];
+export type Expense = components['schemas']['Expense'];
+export type ExpenseInput = components['schemas']['ExpenseInput'];
+export type ExpenseDraft = Omit<ExpenseInput, 'settleId'>;
