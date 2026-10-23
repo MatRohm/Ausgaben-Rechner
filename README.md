@@ -41,7 +41,17 @@ npm run dev
 ```
 
 - Frontend: http://localhost:5173 (proxied `/api` → Backend)
-- Backend/API: http://localhost:3000
+- Backend/API: http://localhost:3005
+
+Ist der Standardport belegt, kann ein anderer Port gesetzt werden. `PORT`
+steuert sowohl den API-Server als auch das Ziel des Vite-Dev-Proxys:
+
+```bash
+PORT=3006 npm run dev
+```
+
+Dann läuft die API auf http://localhost:3006, das Frontend bleibt auf
+http://localhost:5173.
 
 ## Prüfungen
 
@@ -114,10 +124,10 @@ docker run -d \
 
 ## Konfiguration (Umgebungsvariablen)
 
-| Variable   | Standard | Beschreibung                     |
-| ---------- | -------- | -------------------------------- |
-| `PORT`     | `3000`   | Port des Servers                 |
-| `DATA_DIR` | `./data` | Verzeichnis für die SQLite-Datei |
+| Variable   | Standard | Beschreibung                                                      |
+| ---------- | -------- | ----------------------------------------------------------------- |
+| `PORT`     | `3005`   | Port des Servers und Ziel des Vite-Dev-Proxys (Docker setzt 3000) |
+| `DATA_DIR` | `./data` | Verzeichnis für die SQLite-Datei                                  |
 
 ## API
 
