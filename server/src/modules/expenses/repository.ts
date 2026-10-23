@@ -1,0 +1,139 @@
+import { db } from '../../shared/database.js';
+import type { Expense, ExpenseInput } from './types.js';
+
+interface ExpenseRow {
+  id: number;
+  description: string;
+  amount_cents: number;
+  paid_by_id: number;
+  settle_id: number;
+  date: string;
+  settled: number;
+  created_at: string;
+  paid_by_name: string;
+}
+
+interface ParticipantRow {
+  person_id: number;
+  weight: number;
+  name: string;
+}
+
+const expenseSelect = `
+  SELECT e.id, e.description, e.amount_cents, e.paid_by_id, e.settle_id, e.date, e.settled,
+         e.created_at,
+         p.name AS paid_by_name
+  FROM expenses e
+  JOIN persons p ON p.id = e.paid_by_id
+`;
+
+function participantsFor(expenseId: number): ParticipantRow[] {
+  return db
+    .prepare(
+      `
+      SELECT ep.person_id, ep.weight, p.name
+      FROM expense_participants ep
+      JOIN persons p ON p.id = ep.person_id
+      WHERE ep.expense_id = ?
+      ORDER BY p.name COLLATE NOCASE
+    `,
+    )
+    .all(expenseId) as ParticipantRow[];
+}
+
+function rowToExpense(row: ExpenseRow, participants: ParticipantRow[]): Expense {
+  return {
+    id: row.id,
+    description: row.description,
+    amountCents: row.amount_cents,
+    paidById: row.paid_by_id,
+    paidByName: row.paid_by_name,
+    settleId: row.settle_id,
+    date: row.date,
+    settled: !!row.settled,
+    createdAt: row.created_at,
+    participants: participants.map((p) => ({
+      personId: p.person_id,
+      weight: p.weight,
+      name: p.name,
+    })),
+  };
+}
+
+export function listExpenses(settleId?: number): Expense[] {
+  const rows = (settleId == null
+    ? db.prepare(`${expenseSelect} ORDER BY e.date DESC, e.id DESC`).all()
+    : db
+        .prepare(`${expenseSelect} WHERE e.settle_id = ? ORDER BY e.date DESC, e.id DESC`)
+        .all(settleId)) as ExpenseRow[];
+  return rows.map((r) => rowToExpense(r, participantsFor(r.id)));
+}
+
+export function getExpense(id: number): Expense | undefined {
+  const row = db
+    .prepare(`${expenseSelect} WHERE e.id = ?`)
+    .get(id) as ExpenseRow | undefined;
+  if (!row) return undefined;
+  return rowToExpense(row, participantsFor(row.id));
+}
+
+const createExpenseTx = db.transaction((input: ExpenseInput) => {
+  const info = db
+    .prepare(
+      'INSERT INTO expenses (description, amount_cents, paid_by_id, settle_id, date) VALUES (?, ?, ?, ?, ?)',
+    )
+    .run(
+      input.description,
+      input.amountCents,
+      input.paidById,
+      input.settleId,
+      input.date,
+    );
+  const id = Number(info.lastInsertRowid);
+  const insertPart = db.prepare(
+    'INSERT INTO expense_participants (expense_id, person_id, weight) VALUES (?, ?, ?)',
+  );
+  for (const p of input.participants) {
+    insertPart.run(id, p.personId, p.weight);
+  }
+  return id;
+});
+
+export function createExpense(input: ExpenseInput): Expense {
+  const id = createExpenseTx(input);
+  return getExpense(id)!;
+}
+
+const updateExpenseTx = db.transaction((id: number, input: ExpenseInput) => {
+  db.prepare(
+    'UPDATE expenses SET description = ?, amount_cents = ?, paid_by_id = ?, settle_id = ?, date = ? WHERE id = ?',
+  ).run(
+    input.description,
+    input.amountCents,
+    input.paidById,
+    input.settleId,
+    input.date,
+    id,
+  );
+  db.prepare('DELETE FROM expense_participants WHERE expense_id = ?').run(id);
+  const insertPart = db.prepare(
+    'INSERT INTO expense_participants (expense_id, person_id, weight) VALUES (?, ?, ?)',
+  );
+  for (const p of input.participants) {
+    insertPart.run(id, p.personId, p.weight);
+  }
+});
+
+export function updateExpense(id: number, input: ExpenseInput): Expense | undefined {
+  updateExpenseTx(id, input);
+  return getExpense(id);
+}
+
+export function deleteExpense(id: number): void {
+  db.prepare('DELETE FROM expenses WHERE id = ?').run(id);
+}
+
+export function setExpenseSettled(id: number, settled: boolean): Expense {
+  db.prepare('UPDATE expenses SET settled = ? WHERE id = ?').run(settled ? 1 : 0, id);
+  return getExpense(id)!;
+}
