@@ -64,3 +64,48 @@ if (!columns.some((c) => c.name === 'settle_id')) {
 if (!columns.some((c) => c.name === 'settled')) {
   db.exec('ALTER TABLE expenses ADD COLUMN settled INTEGER NOT NULL DEFAULT 0;');
 }
+
+// ----- Versioned data migrations -----
+//
+// Schema migrations (settle_id, settled above) are detected from the schema via
+// PRAGMA and stay where they are. Data migrations that cannot be inferred from
+// the schema are tracked in a `schema_migrations` table so each one runs exactly
+// once, in order, at startup.
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS schema_migrations (
+    id TEXT PRIMARY KEY,
+    applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+`);
+
+const migrations: { id: string; up: () => void }[] = [
+  {
+    // Normalize full dates (YYYY-MM-DD) to the first of the month (YYYY-MM-01),
+    // keeping a valid ISO date after the switch to month/year input.
+    id: 'normalize-expense-dates-to-month',
+    up: () => {
+      db.prepare(
+        `UPDATE expenses
+         SET date = substr(date, 1, 7) || '-01'
+         WHERE length(date) = 10 AND substr(date, 9, 2) <> '01'`,
+      ).run();
+    },
+  },
+];
+
+const appliedMigrations = new Set(
+  (db.prepare('SELECT id FROM schema_migrations').all() as { id: string }[]).map(
+    (row) => row.id,
+  ),
+);
+
+for (const migration of migrations) {
+  if (appliedMigrations.has(migration.id)) continue;
+  // Run the migration and record it atomically: if the migration throws, the
+  // record is rolled back too, so it retries on the next startup.
+  db.transaction(() => {
+    migration.up();
+    db.prepare('INSERT INTO schema_migrations (id) VALUES (?)').run(migration.id);
+  })();
+}
