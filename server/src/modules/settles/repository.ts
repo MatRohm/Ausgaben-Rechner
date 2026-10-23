@@ -19,9 +19,7 @@ export function listSettles(): Settle[] {
 }
 
 export function getSettle(id: number): Settle | undefined {
-  return db
-    .prepare(`${settleSelect} WHERE s.id = ? GROUP BY s.id`)
-    .get(id) as Settle | undefined;
+  return db.prepare(`${settleSelect} WHERE s.id = ? GROUP BY s.id`).get(id) as Settle | undefined;
 }
 
 export function insertSettle(name: string): Settle {

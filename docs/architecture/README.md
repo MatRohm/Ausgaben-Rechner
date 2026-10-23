@@ -7,12 +7,12 @@ REST API.
 
 ## Module ownership
 
-| Module      | Owns                                                                 | Public entry point            |
-| ----------- | -------------------------------------------------------------------- | ----------------------------- |
-| `persons`   | People who can pay for and share expenses                            | `modules/persons/index.ts`    |
-| `settles`   | Settlements ("Abrechnungen"), including open/closed lifecycle state  | `modules/settles/index.ts`    |
-| `expenses`  | Expenses, their payer, participants, weights, and paid/unpaid state | `modules/expenses/index.ts`   |
-| `settlement`| Balance and transfer calculation for one settle                      | `modules/settlement/index.ts` |
+| Module       | Owns                                                                | Public entry point            |
+| ------------ | ------------------------------------------------------------------- | ----------------------------- |
+| `persons`    | People who can pay for and share expenses                           | `modules/persons/index.ts`    |
+| `settles`    | Settlements ("Abrechnungen"), including open/closed lifecycle state | `modules/settles/index.ts`    |
+| `expenses`   | Expenses, their payer, participants, weights, and paid/unpaid state | `modules/expenses/index.ts`   |
+| `settlement` | Balance and transfer calculation for one settle                     | `modules/settlement/index.ts` |
 
 The same four modules exist in `client/src/modules/` and
 `server/src/modules/`. Module names and ownership are intentionally aligned,
@@ -43,13 +43,13 @@ target module's `index.ts`.
 
 Each backend module follows the same shape where the module needs it:
 
-| File            | Responsibility                                                       |
-| --------------- | -------------------------------------------------------------------- |
-| `types.ts`      | Domain/contract types, framework-free                                 |
-| `repository.ts` | SQLite access; the only place in the module that touches the schema   |
-| `service.ts`    | Application rules, cross-module calls through public module indexes   |
-| `routes.ts`     | HTTP parsing, status codes, mapping to application services          |
-| `index.ts`      | Public API; the only cross-module import target                       |
+| File            | Responsibility                                                      |
+| --------------- | ------------------------------------------------------------------- |
+| `types.ts`      | Domain/contract types, framework-free                               |
+| `repository.ts` | SQLite access; the only place in the module that touches the schema |
+| `service.ts`    | Application rules, cross-module calls through public module indexes |
+| `routes.ts`     | HTTP parsing, status codes, mapping to application services         |
+| `index.ts`      | Public API; the only cross-module import target                     |
 
 `routes.ts` must not import `repository.ts`; it calls `service.ts`.
 `service.ts` must not import Express. `types.ts` must not import Express or the
@@ -59,15 +59,15 @@ that query their tables.
 
 ## Frontend layers
 
-| Path                         | Responsibility                                            |
-| ---------------------------- | --------------------------------------------------------- |
-| `app/`                       | App shell, router, bootstrap; may wire modules together   |
-| `modules/<name>/index.ts`    | Public API of the feature module                          |
-| `modules/<name>/api.ts`      | REST client for that feature, using `shared/http.ts`      |
-| `modules/<name>/types.ts`    | Request/response types owned by that feature              |
-| `modules/<name>/*.vue`       | Pages/components private to the feature by default        |
-| `shared/http.ts`             | The only fetch wrapper                                     |
-| `shared/format.ts`           | Framework-free formatting utilities                       |
+| Path                      | Responsibility                                          |
+| ------------------------- | ------------------------------------------------------- |
+| `app/`                    | App shell, router, bootstrap; may wire modules together |
+| `modules/<name>/index.ts` | Public API of the feature module                        |
+| `modules/<name>/api.ts`   | REST client for that feature, using `shared/http.ts`    |
+| `modules/<name>/types.ts` | Request/response types owned by that feature            |
+| `modules/<name>/*.vue`    | Pages/components private to the feature by default      |
+| `shared/http.ts`          | The only fetch wrapper                                  |
+| `shared/format.ts`        | Framework-free formatting utilities                     |
 
 Feature-specific stores/composables (`useSettles`) are private unless the module
 exports them deliberately. `settles` exports the selected-settle composable
@@ -109,6 +109,12 @@ complexity than value for this repository:
   returns the small, explicit shapes in each module's `types.ts`.
 - Keep comments and docs current when module ownership changes.
 
+## Code quality
+
+ESLint (Vue + TypeScript) and Prettier run in `npm run verify` and CI. They cover
+code quality and style; module boundaries remain dependency-cruiser's job so the
+two checks do not duplicate each other.
+
 ## Known coupling and exceptions
 
 - **Shared SQLite schema:** `settles/repository.ts` reads the `expenses` table
@@ -123,9 +129,6 @@ complexity than value for this repository:
   and `server/tests/contracts.test.ts` validates real responses against the
   published contract. Regenerate with `npm run contracts:generate`; CI fails if
   the committed types are stale.
-- **No formatter/linter yet:** type checking, dependency-cruiser, tests, and the
-  production build are the automated gates. ESLint can be added later without
-  changing the module layout.
 
 ## REST boundary
 
@@ -150,6 +153,8 @@ the client bundle.
 
 ```bash
 npm run typecheck         # vue-tsc + tsc --noEmit
+npm run lint              # ESLint for Vue and TypeScript
+npm run format:check      # Prettier
 npm run contracts:check   # regenerate client types and reject stale output
 npm run arch:check        # dependency-cruiser for client and server
 npm test                  # unit, integration, and OpenAPI contract tests

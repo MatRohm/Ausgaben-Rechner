@@ -108,12 +108,7 @@ onMounted(load);
     <p v-else-if="settles.length === 0" class="empty">Noch keine Abrechnung vorhanden.</p>
 
     <ul class="settle-list">
-      <li
-        v-for="s in settles"
-        :key="s.id"
-        class="settle-card"
-        :class="{ closed: s.closedAt }"
-      >
+      <li v-for="s in settles" :key="s.id" class="settle-card" :class="{ closed: s.closedAt }">
         <div class="settle-main">
           <template v-if="editingId === s.id">
             <input

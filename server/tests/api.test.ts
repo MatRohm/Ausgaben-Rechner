@@ -1,10 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  api,
-  requestJson,
-  startTestServer,
-  type TestServer,
-} from './helpers';
+import { api, requestJson, startTestServer, type TestServer } from './helpers';
 
 interface Person {
   id: number;
@@ -68,10 +63,7 @@ describe('REST API', () => {
       }),
     });
 
-    const result = await api<SettlementResult>(
-      server.baseUrl,
-      `/api/settlement/${settle.id}`,
-    );
+    const result = await api<SettlementResult>(server.baseUrl, `/api/settlement/${settle.id}`);
     expect(result.transfers).toEqual([
       {
         fromPersonId: bob.id,
@@ -92,9 +84,7 @@ describe('REST API', () => {
       `/api/settlement/${settle.id}`,
     );
     expect(afterSettled.transfers).toEqual([]);
-    expect(
-      afterSettled.balances.every((balance) => balance.balanceCents === 0),
-    ).toBe(true);
+    expect(afterSettled.balances.every((balance) => balance.balanceCents === 0)).toBe(true);
   });
 
   it('rejects writes to a closed settle', async () => {

@@ -38,10 +38,7 @@ module.exports = {
       from: { path: '^client/src/modules/([^/]+)/.+' },
       to: {
         path: '^client/src/modules/([^/]+)/.+',
-        pathNot: [
-          '^client/src/modules/$1/.+',
-          '^client/src/modules/[^/]+/index\\.ts$',
-        ],
+        pathNot: ['^client/src/modules/$1/.+', '^client/src/modules/[^/]+/index\\.ts$'],
       },
     },
     {
@@ -52,10 +49,7 @@ module.exports = {
       from: { path: '^server/src/modules/([^/]+)/.+' },
       to: {
         path: '^server/src/modules/([^/]+)/.+',
-        pathNot: [
-          '^server/src/modules/$1/.+',
-          '^server/src/modules/[^/]+/index\\.ts$',
-        ],
+        pathNot: ['^server/src/modules/$1/.+', '^server/src/modules/[^/]+/index\\.ts$'],
       },
     },
     {

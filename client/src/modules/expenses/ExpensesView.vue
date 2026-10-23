@@ -143,11 +143,7 @@ function participantsLabel(expense: Expense): string {
     </div>
 
     <div class="toolbar">
-      <SettleSelect
-        :settles="settles"
-        :model-value="selectedId"
-        @update:model-value="selectId"
-      />
+      <SettleSelect :settles="settles" :model-value="selectedId" @update:model-value="selectId" />
     </div>
 
     <p v-if="selectedClosed" class="notice">
@@ -167,12 +163,7 @@ function participantsLabel(expense: Expense): string {
     </div>
 
     <ul v-else class="expense-list">
-      <li
-        v-for="e in expenses"
-        :key="e.id"
-        class="expense-card"
-        :class="{ settled: e.settled }"
-      >
+      <li v-for="e in expenses" :key="e.id" class="expense-card" :class="{ settled: e.settled }">
         <div class="expense-main">
           <div class="expense-top">
             <span class="expense-desc">{{ e.description }}</span>

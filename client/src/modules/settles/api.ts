@@ -13,9 +13,7 @@ export const settlesApi = {
       method: 'PATCH',
       body: JSON.stringify({ name }),
     }),
-  close: (id: number) =>
-    request<Settle>(`/api/settles/${id}/close`, { method: 'POST' }),
-  reopen: (id: number) =>
-    request<Settle>(`/api/settles/${id}/reopen`, { method: 'POST' }),
+  close: (id: number) => request<Settle>(`/api/settles/${id}/close`, { method: 'POST' }),
+  reopen: (id: number) => request<Settle>(`/api/settles/${id}/reopen`, { method: 'POST' }),
   remove: (id: number) => request<void>(`/api/settles/${id}`, { method: 'DELETE' }),
 };

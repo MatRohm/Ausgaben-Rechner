@@ -16,8 +16,7 @@ export function useSettles() {
     try {
       settles.value = await settlesApi.list();
       const stillValid =
-        selectedId.value != null &&
-        settles.value.some((s) => s.id === selectedId.value);
+        selectedId.value != null && settles.value.some((s) => s.id === selectedId.value);
       if (!stillValid) {
         selectedId.value =
           settles.value.find((s) => !s.closedAt)?.id ?? settles.value[0]?.id ?? null;
@@ -29,9 +28,7 @@ export function useSettles() {
     }
   }
 
-  const selected = computed(
-    () => settles.value.find((s) => s.id === selectedId.value) ?? null,
-  );
+  const selected = computed(() => settles.value.find((s) => s.id === selectedId.value) ?? null);
 
   return { settles, loading, error, selectedId, selected, load };
 }

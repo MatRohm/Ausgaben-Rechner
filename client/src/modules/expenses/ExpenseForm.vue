@@ -131,11 +131,7 @@ function submitNew() {
 
     <label class="field">
       <span>Beschreibung</span>
-      <input
-        v-model="description"
-        type="text"
-        placeholder="z. B. Einkauf, Restaurant, Miete"
-      />
+      <input v-model="description" type="text" placeholder="z. B. Einkauf, Restaurant, Miete" />
     </label>
 
     <label class="field">
@@ -161,7 +157,11 @@ function submitNew() {
       <div class="participants">
         <div v-for="p in persons" :key="p.id" class="participant-row">
           <label class="participant-check">
-            <input type="checkbox" :checked="selected.includes(p.id)" @change="togglePerson(p.id)" />
+            <input
+              type="checkbox"
+              :checked="selected.includes(p.id)"
+              @change="togglePerson(p.id)"
+            />
             <span>{{ p.name }}</span>
           </label>
           <input

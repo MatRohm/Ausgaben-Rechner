@@ -1,10 +1,6 @@
 import type { ValidateFunction } from 'ajv';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  requestJson,
-  startTestServer,
-  type TestServer,
-} from './helpers';
+import { requestJson, startTestServer, type TestServer } from './helpers';
 
 interface JsonSchema {
   [key: string]: unknown;
@@ -89,10 +85,9 @@ async function call<T>(
     ).toBeDefined();
     if (validate) {
       const valid = validate(body);
-      expect(
-        valid,
-        `${method.toUpperCase()} ${path}: ${JSON.stringify(validate.errors)}`,
-      ).toBe(true);
+      expect(valid, `${method.toUpperCase()} ${path}: ${JSON.stringify(validate.errors)}`).toBe(
+        true,
+      );
     }
   }
   return body as T;
@@ -104,19 +99,14 @@ beforeAll(async () => {
   // cleanup hooks race with Vitest's worker teardown on Node 24.
   server = await startTestServer();
 
-  const [{ default: SwaggerParser }, { default: Ajv }, { default: addFormats }] =
-    await Promise.all([
-      import('@apidevtools/swagger-parser'),
-      import('ajv'),
-      import('ajv-formats'),
-    ]);
+  const [{ default: SwaggerParser }, { default: Ajv }, { default: addFormats }] = await Promise.all(
+    [import('@apidevtools/swagger-parser'), import('ajv'), import('ajv-formats')],
+  );
   const ajv = new Ajv({ strict: false, allErrors: true });
   addFormats(ajv);
   compile = (schema) => ajv.compile(schema);
 
-  document = (await SwaggerParser.validate(
-    'contracts/openapi.yaml',
-  )) as unknown as OpenApiDocument;
+  document = (await SwaggerParser.validate('contracts/openapi.yaml')) as unknown as OpenApiDocument;
 });
 
 afterAll(async () => {
@@ -165,11 +155,7 @@ describe('OpenAPI contract', () => {
         ],
       }),
     });
-    await call<Expense[]>(
-      '/api/expenses',
-      'get',
-      `/api/expenses?settleId=${settle.id}`,
-    );
+    await call<Expense[]>('/api/expenses', 'get', `/api/expenses?settleId=${settle.id}`);
     await call<Expense>('/api/expenses/{id}', 'patch', `/api/expenses/${expense.id}`, {
       method: 'PATCH',
       body: JSON.stringify({
@@ -193,11 +179,7 @@ describe('OpenAPI contract', () => {
         body: JSON.stringify({ settled: true }),
       },
     );
-    await call<unknown>(
-      '/api/settlement/{settleId}',
-      'get',
-      `/api/settlement/${settle.id}`,
-    );
+    await call<unknown>('/api/settlement/{settleId}', 'get', `/api/settlement/${settle.id}`);
 
     await call<Settle>('/api/settles/{id}/close', 'post', `/api/settles/${settle.id}/close`, {
       method: 'POST',
@@ -218,14 +200,10 @@ describe('OpenAPI contract', () => {
   });
 
   it('validates documented error responses', async () => {
-    const response = await requestJson<{ error: string }>(
-      server.baseUrl,
-      '/api/persons',
-      {
-        method: 'POST',
-        body: JSON.stringify({ name: 'Alice' }),
-      },
-    );
+    const response = await requestJson<{ error: string }>(server.baseUrl, '/api/persons', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Alice' }),
+    });
 
     expect(response.status).toBe(409);
     const validate = validatorFor('/api/persons', 'post', response.status);

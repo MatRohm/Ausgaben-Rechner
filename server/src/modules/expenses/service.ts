@@ -7,10 +7,7 @@ function assertSettleOpen(settleId: number): void {
   const settle = getSettle(settleId);
   if (!settle) throw new AppError(400, 'Abrechnung nicht gefunden.');
   if (settle.closedAt) {
-    throw new AppError(
-      400,
-      'Abrechnung ist abgeschlossen und kann nicht mehr bearbeitet werden.',
-    );
+    throw new AppError(400, 'Abrechnung ist abgeschlossen und kann nicht mehr bearbeitet werden.');
   }
 }
 

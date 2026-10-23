@@ -61,11 +61,7 @@ export async function requestJson<T>(
 }
 
 /** Request a JSON endpoint and throw unless the response is 2xx. */
-export async function api<T>(
-  baseUrl: string,
-  path: string,
-  init?: RequestInit,
-): Promise<T> {
+export async function api<T>(baseUrl: string, path: string, init?: RequestInit): Promise<T> {
   const { status, body } = await requestJson<T>(baseUrl, path, init);
   if (status < 200 || status >= 300) {
     throw new Error(

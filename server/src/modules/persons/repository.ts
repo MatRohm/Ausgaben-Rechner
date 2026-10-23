@@ -2,15 +2,11 @@ import { db } from '../../shared/database.js';
 import type { Person } from './types.js';
 
 export function listPersons(): Person[] {
-  return db
-    .prepare('SELECT id, name FROM persons ORDER BY name COLLATE NOCASE')
-    .all() as Person[];
+  return db.prepare('SELECT id, name FROM persons ORDER BY name COLLATE NOCASE').all() as Person[];
 }
 
 export function getPerson(id: number): Person | undefined {
-  return db.prepare('SELECT id, name FROM persons WHERE id = ?').get(id) as
-    | Person
-    | undefined;
+  return db.prepare('SELECT id, name FROM persons WHERE id = ?').get(id) as Person | undefined;
 }
 
 export function insertPerson(name: string): Person {

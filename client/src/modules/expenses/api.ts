@@ -3,9 +3,7 @@ import type { Expense, ExpenseInput } from './types';
 
 export const expensesApi = {
   list: (settleId?: number) =>
-    request<Expense[]>(
-      settleId != null ? `/api/expenses?settleId=${settleId}` : '/api/expenses',
-    ),
+    request<Expense[]>(settleId != null ? `/api/expenses?settleId=${settleId}` : '/api/expenses'),
   create: (input: ExpenseInput) =>
     request<Expense>('/api/expenses', {
       method: 'POST',

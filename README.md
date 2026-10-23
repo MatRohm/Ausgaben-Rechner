@@ -49,7 +49,9 @@ Die gleichen Prüfungen laufen in der CI (`.github/workflows/ci.yml`):
 
 ```bash
 npm run typecheck         # Vue- und Server-TypeScript
-npm run contracts:check   # OpenAPI-Typen neu generieren und auf Aktualität prüfen
+npm run lint              # ESLint für Vue und TypeScript
+npm run format:check      # Prettier
+npm run contracts:check   # OpenAPI-Typen auf Aktualität prüfen
 npm run arch:check        # Modulgrenzen und Abhängigkeitsrichtung
 npm test                  # Unit-, Integrations- und Contract-Tests
 npm run build             # Produktions-Build beider Workspaces
@@ -79,7 +81,7 @@ git tag v1.0.0
 git push origin v1.0.0
 ```
 
-Hinweis: GHCR-Pakete sind standardmäßig **privat**. Damit andere das Image ohne Login ziehen können, muss das Paket unter *Settings → Packages* (bzw. auf der Paketseite → *Package settings → Change visibility*) auf **Public** gestellt werden.
+Hinweis: GHCR-Pakete sind standardmäßig **privat**. Damit andere das Image ohne Login ziehen können, muss das Paket unter _Settings → Packages_ (bzw. auf der Paketseite → _Package settings → Change visibility_) auf **Public** gestellt werden.
 
 Image ziehen und starten:
 
@@ -112,10 +114,10 @@ docker run -d \
 
 ## Konfiguration (Umgebungsvariablen)
 
-| Variable  | Standard  | Beschreibung                          |
-| --------- | --------- | ------------------------------------- |
-| `PORT`    | `3000`    | Port des Servers                      |
-| `DATA_DIR`| `./data`  | Verzeichnis für die SQLite-Datei      |
+| Variable   | Standard | Beschreibung                     |
+| ---------- | -------- | -------------------------------- |
+| `PORT`     | `3000`   | Port des Servers                 |
+| `DATA_DIR` | `./data` | Verzeichnis für die SQLite-Datei |
 
 ## API
 

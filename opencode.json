@@ -1,6 +1,4 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "permissions": [
-    { "action": "shell", "resource": "git push *", "effect": "ask" }
-  ]
+  "permissions": [{ "action": "shell", "resource": "git push *", "effect": "ask" }]
 }

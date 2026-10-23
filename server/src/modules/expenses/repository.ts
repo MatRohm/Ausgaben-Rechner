@@ -61,18 +61,18 @@ function rowToExpense(row: ExpenseRow, participants: ParticipantRow[]): Expense 
 }
 
 export function listExpenses(settleId?: number): Expense[] {
-  const rows = (settleId == null
-    ? db.prepare(`${expenseSelect} ORDER BY e.date DESC, e.id DESC`).all()
-    : db
-        .prepare(`${expenseSelect} WHERE e.settle_id = ? ORDER BY e.date DESC, e.id DESC`)
-        .all(settleId)) as ExpenseRow[];
+  const rows = (
+    settleId == null
+      ? db.prepare(`${expenseSelect} ORDER BY e.date DESC, e.id DESC`).all()
+      : db
+          .prepare(`${expenseSelect} WHERE e.settle_id = ? ORDER BY e.date DESC, e.id DESC`)
+          .all(settleId)
+  ) as ExpenseRow[];
   return rows.map((r) => rowToExpense(r, participantsFor(r.id)));
 }
 
 export function getExpense(id: number): Expense | undefined {
-  const row = db
-    .prepare(`${expenseSelect} WHERE e.id = ?`)
-    .get(id) as ExpenseRow | undefined;
+  const row = db.prepare(`${expenseSelect} WHERE e.id = ?`).get(id) as ExpenseRow | undefined;
   if (!row) return undefined;
   return rowToExpense(row, participantsFor(row.id));
 }
@@ -82,13 +82,7 @@ const createExpenseTx = db.transaction((input: ExpenseInput) => {
     .prepare(
       'INSERT INTO expenses (description, amount_cents, paid_by_id, settle_id, date) VALUES (?, ?, ?, ?, ?)',
     )
-    .run(
-      input.description,
-      input.amountCents,
-      input.paidById,
-      input.settleId,
-      input.date,
-    );
+    .run(input.description, input.amountCents, input.paidById, input.settleId, input.date);
   const id = Number(info.lastInsertRowid);
   const insertPart = db.prepare(
     'INSERT INTO expense_participants (expense_id, person_id, weight) VALUES (?, ?, ?)',
@@ -107,14 +101,7 @@ export function createExpense(input: ExpenseInput): Expense {
 const updateExpenseTx = db.transaction((id: number, input: ExpenseInput) => {
   db.prepare(
     'UPDATE expenses SET description = ?, amount_cents = ?, paid_by_id = ?, settle_id = ?, date = ? WHERE id = ?',
-  ).run(
-    input.description,
-    input.amountCents,
-    input.paidById,
-    input.settleId,
-    input.date,
-    id,
-  );
+  ).run(input.description, input.amountCents, input.paidById, input.settleId, input.date, id);
   db.prepare('DELETE FROM expense_participants WHERE expense_id = ?').run(id);
   const insertPart = db.prepare(
     'INSERT INTO expense_participants (expense_id, person_id, weight) VALUES (?, ?, ?)',

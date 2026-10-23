@@ -1,11 +1,6 @@
 import { Router } from 'express';
 import { sendError } from '../../shared/http.js';
-import {
-  createPerson,
-  deletePerson,
-  listPersons,
-  renamePerson,
-} from './service.js';
+import { createPerson, deletePerson, listPersons, renamePerson } from './service.js';
 
 export const personsRouter = Router();
 

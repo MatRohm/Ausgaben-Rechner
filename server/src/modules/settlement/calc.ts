@@ -1,20 +1,13 @@
 import type { Expense } from '../expenses/index.js';
 import type { Person } from '../persons/index.js';
-import type {
-  SettlementBalance,
-  SettlementResult,
-  SettlementTransfer,
-} from './types.js';
+import type { SettlementBalance, SettlementResult, SettlementTransfer } from './types.js';
 
 /**
  * Pure settlement calculation: given all persons and the expenses of one
  * settle, produce balances, the minimal transfer list, and the expenses that
  * are already marked as paid.
  */
-export function calculateSettlement(
-  persons: Person[],
-  expenses: Expense[],
-): SettlementResult {
+export function calculateSettlement(persons: Person[], expenses: Expense[]): SettlementResult {
   const unsettled = expenses.filter((e) => !e.settled);
 
   const balanceMap = new Map<number, number>();
@@ -40,9 +33,7 @@ export function calculateSettlement(
     for (let i = 0; i < e.participants.length; i++) {
       const p = e.participants[i];
       const isLast = i === e.participants.length - 1;
-      const share = isLast
-        ? remaining
-        : Math.floor((e.amountCents * p.weight) / totalWeight);
+      const share = isLast ? remaining : Math.floor((e.amountCents * p.weight) / totalWeight);
       owedMap.set(p.personId, (owedMap.get(p.personId) ?? 0) + share);
       balanceMap.set(p.personId, (balanceMap.get(p.personId) ?? 0) - share);
       remaining -= share;

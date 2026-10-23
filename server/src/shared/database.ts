@@ -53,9 +53,9 @@ if (!columns.some((c) => c.name === 'settle_id')) {
   db.exec(
     'ALTER TABLE expenses ADD COLUMN settle_id INTEGER REFERENCES settles(id) ON DELETE CASCADE;',
   );
-  const orphan = db
-    .prepare('SELECT COUNT(*) AS c FROM expenses WHERE settle_id IS NULL')
-    .get() as { c: number };
+  const orphan = db.prepare('SELECT COUNT(*) AS c FROM expenses WHERE settle_id IS NULL').get() as {
+    c: number;
+  };
   if (orphan.c > 0) {
     const info = db.prepare('INSERT INTO settles (name) VALUES (?)').run('Standard');
     db.prepare('UPDATE expenses SET settle_id = ? WHERE settle_id IS NULL').run(
@@ -99,9 +99,7 @@ const migrations: { id: string; up: () => void }[] = [
 ];
 
 const appliedMigrations = new Set(
-  (db.prepare('SELECT id FROM schema_migrations').all() as { id: string }[]).map(
-    (row) => row.id,
-  ),
+  (db.prepare('SELECT id FROM schema_migrations').all() as { id: string }[]).map((row) => row.id),
 );
 
 for (const migration of migrations) {

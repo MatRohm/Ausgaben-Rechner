@@ -12,9 +12,7 @@ const loading = ref(true);
 const error = ref('');
 
 const settledTotal = computed(() =>
-  result.value
-    ? result.value.settledExpenses.reduce((sum, e) => sum + e.amountCents, 0)
-    : 0,
+  result.value ? result.value.settledExpenses.reduce((sum, e) => sum + e.amountCents, 0) : 0,
 );
 
 function selectId(v: number | null) {
@@ -54,11 +52,7 @@ onMounted(async () => {
     </div>
 
     <div class="toolbar">
-      <SettleSelect
-        :settles="settles"
-        :model-value="selectedId"
-        @update:model-value="selectId"
-      />
+      <SettleSelect :settles="settles" :model-value="selectedId" @update:model-value="selectId" />
     </div>
 
     <p v-if="selected?.closedAt" class="notice">Diese Abrechnung ist abgeschlossen.</p>
@@ -79,10 +73,7 @@ onMounted(async () => {
             <span class="balance-detail">
               bezahlt {{ formatMoney(b.paidCents) }} · Anteil {{ formatMoney(b.owedCents) }}
             </span>
-            <span
-              class="balance-amount"
-              :class="b.balanceCents >= 0 ? 'positive' : 'negative'"
-            >
+            <span class="balance-amount" :class="b.balanceCents >= 0 ? 'positive' : 'negative'">
               {{ formatMoney(b.balanceCents) }}
             </span>
           </li>
