@@ -7,6 +7,10 @@ fs.mkdirSync(dataDir, { recursive: true });
 
 export const db = new Database(path.join(dataDir, 'ausgaben.db'));
 
+export function closeDatabase(): void {
+  db.close();
+}
+
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 

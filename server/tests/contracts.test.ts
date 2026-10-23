@@ -1,6 +1,4 @@
-import SwaggerParser from '@apidevtools/swagger-parser';
-import Ajv, { type ValidateFunction } from 'ajv';
-import addFormats from 'ajv-formats';
+import type { ValidateFunction } from 'ajv';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   requestJson,
@@ -42,9 +40,8 @@ interface Expense {
 
 let server: TestServer;
 let document: OpenApiDocument;
+let compile: (schema: JsonSchema) => ValidateFunction;
 
-const ajv = new Ajv({ strict: false, allErrors: true });
-addFormats(ajv);
 const validators = new Map<string, ValidateFunction>();
 
 function validatorFor(
@@ -68,7 +65,7 @@ function validatorFor(
   const key = `${method} ${pathTemplate} ${status}`;
   let validate = validators.get(key);
   if (!validate) {
-    validate = ajv.compile(schema);
+    validate = compile(schema);
     validators.set(key, validate);
   }
   return validate;
@@ -102,7 +99,21 @@ async function call<T>(
 }
 
 beforeAll(async () => {
+  // Start the server first so better-sqlite3 is initialized before the schema
+  // tooling. Loading the native module after Ajv/SwaggerParser makes its
+  // cleanup hooks race with Vitest's worker teardown on Node 24.
   server = await startTestServer();
+
+  const [{ default: SwaggerParser }, { default: Ajv }, { default: addFormats }] =
+    await Promise.all([
+      import('@apidevtools/swagger-parser'),
+      import('ajv'),
+      import('ajv-formats'),
+    ]);
+  const ajv = new Ajv({ strict: false, allErrors: true });
+  addFormats(ajv);
+  compile = (schema) => ajv.compile(schema);
+
   document = (await SwaggerParser.validate(
     'contracts/openapi.yaml',
   )) as unknown as OpenApiDocument;

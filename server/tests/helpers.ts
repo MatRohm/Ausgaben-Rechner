@@ -38,6 +38,8 @@ export async function startTestServer(): Promise<TestServer> {
       await new Promise<void>((resolve, reject) => {
         server.close((error) => (error ? reject(error) : resolve()));
       });
+      const { closeDatabase } = await import('../src/shared/database');
+      closeDatabase();
       rmSync(dataDir, { recursive: true, force: true });
       if (previousDataDir === undefined) delete process.env.DATA_DIR;
       else process.env.DATA_DIR = previousDataDir;
