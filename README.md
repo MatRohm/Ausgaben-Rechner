@@ -47,10 +47,10 @@ Die App ist dann unter http://localhost:3000 erreichbar. Die SQLite-Datei liegt 
 
 ## CI/CD (GitHub Actions)
 
-Der Workflow `.github/workflows/docker-release.yml` baut das Docker-Image und lädt es in die GitHub Container Registry (GHCR) hoch:
+Der Workflow `.github/workflows/docker-release.yml` baut das Docker-Image bei jedem Push:
 
-- **Push auf `main`** → Image wird als `ghcr.io/<owner>/<repo>:latest` (und mit dem Commit-SHA) veröffentlicht.
-- **Tag `v*`** (z. B. `v1.0.0`) → Image wird zusätzlich als `ghcr.io/<owner>/<repo>:v1.0.0` veröffentlicht und ein GitHub-Release mit Docker-Anleitung erstellt.
+- **Push auf `main`** → Image wird nur **gebaut** (Build-Check), nicht veröffentlicht.
+- **Tag `v*`** (z. B. `v1.0.0`) → Image wird als `ghcr.io/<owner>/<repo>:v1.0.0` und `:latest` in die GitHub Container Registry (GHCR) hochgeladen und ein GitHub-Release mit Docker-Anleitung erstellt.
 
 ```bash
 git tag v1.0.0
