@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    container_name: ausgaben-rechner
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DATA_DIR=/app/data
+    volumes:
+      - ausgaben-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  ausgaben-data:
