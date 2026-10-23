@@ -157,6 +157,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/expenses/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import selected bank statement rows as expenses */
+        post: operations["importExpenses"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/expenses/{id}": {
         parameters: {
             query?: never;
@@ -279,6 +296,18 @@ export interface components {
             /** Format: date */
             date: string;
             participants: components["schemas"]["ExpenseParticipantInput"][];
+        };
+        ExpenseImportRow: {
+            description: string;
+            amountCents: number;
+            /** Format: date */
+            date: string;
+        };
+        ExpenseImportInput: {
+            settleId: number;
+            paidById: number;
+            participants: components["schemas"]["ExpenseParticipantInput"][];
+            expenses: components["schemas"]["ExpenseImportRow"][];
         };
         SettledInput: {
             settled: boolean;
@@ -652,6 +681,31 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Expense"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+        };
+    };
+    importExpenses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExpenseImportInput"];
+            };
+        };
+        responses: {
+            /** @description Imported expenses */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Expense"][];
                 };
             };
             400: components["responses"]["BadRequest"];

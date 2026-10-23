@@ -102,6 +102,13 @@ body {
   margin: 0;
 }
 
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
 /* Buttons */
 .btn {
   font: inherit;
@@ -251,6 +258,81 @@ fieldset.field {
   overflow-y: auto;
   padding: 1.25rem;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Statement import */
+.import-modal {
+  max-width: 720px;
+}
+
+.import-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.75rem 0;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.import-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.import-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.import-row.disabled {
+  opacity: 0.6;
+}
+
+.import-row > input[type='checkbox'] {
+  width: auto;
+  margin-top: 0.2rem;
+}
+
+.import-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.import-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.import-desc {
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.import-amount {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.import-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 /* Expense list */
@@ -546,6 +628,16 @@ fieldset.field {
   color: #4b5563;
 }
 
+.badge-credit {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.badge-duplicate {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 /* Settles list */
 .settle-list {
   list-style: none;
@@ -620,6 +712,21 @@ fieldset.field {
   color: var(--text-muted);
   text-align: center;
   padding: 2rem 1rem;
+}
+
+@media (max-width: 560px) {
+  .view-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    justify-content: stretch;
+  }
+
+  .header-actions .btn {
+    flex: 1;
+  }
 }
 
 /* Desktop layout */

@@ -7,12 +7,12 @@ REST API.
 
 ## Module ownership
 
-| Module       | Owns                                                                | Public entry point            |
-| ------------ | ------------------------------------------------------------------- | ----------------------------- |
-| `persons`    | People who can pay for and share expenses                           | `modules/persons/index.ts`    |
-| `settles`    | Settlements ("Abrechnungen"), including open/closed lifecycle state | `modules/settles/index.ts`    |
-| `expenses`   | Expenses, their payer, participants, weights, and paid/unpaid state | `modules/expenses/index.ts`   |
-| `settlement` | Balance and transfer calculation for one settle                     | `modules/settlement/index.ts` |
+| Module       | Owns                                                                     | Public entry point            |
+| ------------ | ------------------------------------------------------------------------ | ----------------------------- |
+| `persons`    | People who can pay for and share expenses                                | `modules/persons/index.ts`    |
+| `settles`    | Settlements ("Abrechnungen"), including open/closed lifecycle state      | `modules/settles/index.ts`    |
+| `expenses`   | Expenses, payer, participants, weights, paid state, and statement import | `modules/expenses/index.ts`   |
+| `settlement` | Balance and transfer calculation for one settle                          | `modules/settlement/index.ts` |
 
 The same four modules exist in `client/src/modules/` and
 `server/src/modules/`. Module names and ownership are intentionally aligned,

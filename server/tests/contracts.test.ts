@@ -156,6 +156,25 @@ describe('OpenAPI contract', () => {
       }),
     });
     await call<Expense[]>('/api/expenses', 'get', `/api/expenses?settleId=${settle.id}`);
+    const imported = await call<Expense[]>('/api/expenses/import', 'post', '/api/expenses/import', {
+      method: 'POST',
+      body: JSON.stringify({
+        settleId: settle.id,
+        paidById: alice.id,
+        participants: [
+          { personId: alice.id, weight: 1 },
+          { personId: bob.id, weight: 1 },
+        ],
+        expenses: [
+          {
+            description: 'Imported statement row',
+            amountCents: 1500,
+            date: '2025-02-01',
+          },
+        ],
+      }),
+    });
+    expect(imported).toHaveLength(1);
     await call<Expense>('/api/expenses/{id}', 'patch', `/api/expenses/${expense.id}`, {
       method: 'PATCH',
       body: JSON.stringify({

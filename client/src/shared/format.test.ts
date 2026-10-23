@@ -8,6 +8,7 @@ describe('format utilities', () => {
   });
 
   it('formats ISO dates for the German UI', () => {
+    expect(formatDate('2025-01-15')).toBe('15.01.2025');
     expect(formatDate('2025-01-15T00:00:00')).toBe('15.01.2025');
     expect(formatDate('')).toBe('');
   });

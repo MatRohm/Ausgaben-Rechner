@@ -77,7 +77,7 @@ export function getExpense(id: number): Expense | undefined {
   return rowToExpense(row, participantsFor(row.id));
 }
 
-const createExpenseTx = db.transaction((input: ExpenseInput) => {
+function insertExpense(input: ExpenseInput): number {
   const info = db
     .prepare(
       'INSERT INTO expenses (description, amount_cents, paid_by_id, settle_id, date) VALUES (?, ?, ?, ?, ?)',
@@ -91,11 +91,20 @@ const createExpenseTx = db.transaction((input: ExpenseInput) => {
     insertPart.run(id, p.personId, p.weight);
   }
   return id;
-});
+}
+
+const createExpenseTx = db.transaction(insertExpense);
+const createExpensesTx = db.transaction((inputs: ExpenseInput[]) =>
+  inputs.map((input) => insertExpense(input)),
+);
 
 export function createExpense(input: ExpenseInput): Expense {
   const id = createExpenseTx(input);
   return getExpense(id)!;
+}
+
+export function createExpenses(inputs: ExpenseInput[]): Expense[] {
+  return createExpensesTx(inputs).map((id) => getExpense(id)!);
 }
 
 const updateExpenseTx = db.transaction((id: number, input: ExpenseInput) => {

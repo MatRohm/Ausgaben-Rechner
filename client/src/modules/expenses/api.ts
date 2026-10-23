@@ -1,5 +1,5 @@
 import { request } from '@/shared/http';
-import type { Expense, ExpenseInput } from './types';
+import type { Expense, ExpenseImportInput, ExpenseInput } from './types';
 
 export const expensesApi = {
   list: (settleId?: number) =>
@@ -19,5 +19,10 @@ export const expensesApi = {
     request<Expense>(`/api/expenses/${id}/settled`, {
       method: 'PATCH',
       body: JSON.stringify({ settled }),
+    }),
+  import: (input: ExpenseImportInput) =>
+    request<Expense[]>('/api/expenses/import', {
+      method: 'POST',
+      body: JSON.stringify(input),
     }),
 };

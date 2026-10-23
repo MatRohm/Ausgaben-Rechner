@@ -9,6 +9,9 @@ export function formatMoney(cents: number): string {
 
 export function formatDate(dateStr: string): string {
   if (!dateStr) return '';
+  // Date-only values are calendar dates; avoid a UTC-to-local day shift.
+  const isoDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (isoDate) return `${isoDate[3]}.${isoDate[2]}.${isoDate[1]}`;
   const d = new Date(dateStr);
   if (Number.isNaN(d.getTime())) return dateStr;
   return new Intl.DateTimeFormat('de-DE', {

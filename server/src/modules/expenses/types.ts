@@ -25,3 +25,16 @@ export interface ExpenseInput {
   date: string;
   participants: { personId: number; weight: number }[];
 }
+
+export interface ExpenseImportRow {
+  description: string;
+  amountCents: number;
+  date: string;
+}
+
+export interface ExpenseImportInput {
+  settleId: number;
+  paidById: number;
+  participants: { personId: number; weight: number }[];
+  expenses: ExpenseImportRow[];
+}

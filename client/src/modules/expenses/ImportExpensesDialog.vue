@@ -1,0 +1,261 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+import type { Person } from '@/modules/persons';
+import { formatDate, formatMoney } from '@/shared/format';
+import { expensesApi } from './api';
+import { parseStatementJson, type StatementCandidate } from './importStatement';
+import type { Expense } from './types';
+
+interface PreviewCandidate extends StatementCandidate {
+  duplicate: boolean;
+}
+
+const props = defineProps<{
+  persons: Person[];
+  settleId: number;
+  existingExpenses: Expense[];
+}>();
+
+const emit = defineEmits<{
+  (e: 'close'): void;
+  (e: 'imported'): void;
+}>();
+
+const paidById = ref<number | null>(null);
+const selectedParticipants = ref<number[]>(props.persons.map((p) => p.id));
+const candidates = ref<PreviewCandidate[]>([]);
+const selected = ref<Record<number, boolean>>({});
+const skippedOtherCurrency = ref(0);
+const fileName = ref('');
+const error = ref('');
+const importError = ref('');
+const importing = ref(false);
+
+const selectableCandidates = computed(() =>
+  candidates.value.filter((candidate) => candidate.importable && !candidate.duplicate),
+);
+
+const selectedCandidates = computed(() =>
+  candidates.value.filter((candidate) => selected.value[candidate.id]),
+);
+
+const selectedCount = computed(() => selectedCandidates.value.length);
+
+const selectedTotal = computed(() =>
+  selectedCandidates.value.reduce((sum, candidate) => sum + candidate.amountCents, 0),
+);
+
+const allSelected = computed(
+  () =>
+    selectableCandidates.value.length > 0 &&
+    selectableCandidates.value.every((candidate) => selected.value[candidate.id]),
+);
+
+const canImport = computed(
+  () =>
+    paidById.value != null &&
+    selectedParticipants.value.length > 0 &&
+    selectedCount.value > 0 &&
+    !importing.value,
+);
+
+function normalize(text: string): string {
+  return text.trim().toLocaleLowerCase('de-DE').replace(/\s+/g, ' ');
+}
+
+function duplicateKeys(): Set<string> {
+  return new Set(
+    props.existingExpenses.map(
+      (expense) => `${expense.date}|${expense.amountCents}|${normalize(expense.description)}`,
+    ),
+  );
+}
+
+function togglePerson(id: number): void {
+  const index = selectedParticipants.value.indexOf(id);
+  if (index >= 0) selectedParticipants.value.splice(index, 1);
+  else selectedParticipants.value.push(id);
+}
+
+function toggleAll(): void {
+  const next = !allSelected.value;
+  for (const candidate of selectableCandidates.value) {
+    selected.value[candidate.id] = next;
+  }
+}
+
+function toggleCandidate(id: number): void {
+  const candidate = candidates.value.find((entry) => entry.id === id);
+  if (!candidate?.importable) return;
+  selected.value[id] = !selected.value[id];
+}
+
+async function handleFile(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = '';
+
+  if (!file) return;
+
+  error.value = '';
+  importError.value = '';
+  candidates.value = [];
+  selected.value = {};
+  skippedOtherCurrency.value = 0;
+  fileName.value = file.name;
+
+  if (file.size > 5 * 1024 * 1024) {
+    error.value = 'Die Datei ist zu groß (maximal 5 MB).';
+    return;
+  }
+
+  try {
+    const parsed = parseStatementJson(await file.text());
+    const keys = duplicateKeys();
+    candidates.value = parsed.candidates.map((candidate) => ({
+      ...candidate,
+      duplicate:
+        candidate.importable &&
+        keys.has(`${candidate.date}|${candidate.amountCents}|${normalize(candidate.description)}`),
+    }));
+    for (const candidate of candidates.value) {
+      selected.value[candidate.id] = candidate.importable && !candidate.duplicate;
+    }
+    skippedOtherCurrency.value = parsed.skippedOtherCurrency;
+
+    if (candidates.value.length === 0) {
+      error.value =
+        parsed.skippedOtherCurrency > 0
+          ? 'Die Datei enthält keine EUR-Transaktionen.'
+          : 'Die Datei enthält keine Transaktionen.';
+    }
+  } catch (e) {
+    error.value = (e as Error).message;
+  }
+}
+
+async function submit(): Promise<void> {
+  if (!canImport.value || paidById.value == null) return;
+
+  importing.value = true;
+  importError.value = '';
+
+  try {
+    await expensesApi.import({
+      settleId: props.settleId,
+      paidById: paidById.value,
+      participants: selectedParticipants.value.map((personId) => ({ personId, weight: 1 })),
+      expenses: selectedCandidates.value.map((candidate) => ({
+        description: candidate.description,
+        amountCents: candidate.amountCents,
+        date: candidate.date,
+      })),
+    });
+    emit('imported');
+  } catch (e) {
+    importError.value = (e as Error).message;
+  } finally {
+    importing.value = false;
+  }
+}
+</script>
+
+<template>
+  <div class="modal-backdrop" @click.self="emit('close')">
+    <form class="modal import-modal" @submit.prevent="submit">
+      <h2 class="form-title">Aus Kontoauszug importieren</h2>
+
+      <label class="field">
+        <span>Bezahlt von</span>
+        <select v-model="paidById">
+          <option :value="null" disabled>Bitte wählen…</option>
+          <option v-for="person in persons" :key="person.id" :value="person.id">
+            {{ person.name }}
+          </option>
+        </select>
+      </label>
+
+      <fieldset class="field">
+        <legend>Aufteilen auf</legend>
+        <div class="participants">
+          <label v-for="person in persons" :key="person.id" class="participant-check">
+            <input
+              type="checkbox"
+              :checked="selectedParticipants.includes(person.id)"
+              @change="togglePerson(person.id)"
+            />
+            <span>{{ person.name }}</span>
+          </label>
+        </div>
+        <p class="hint">
+          Alle ausgewählten Ausgaben werden zu gleichen Teilen auf diese Personen aufgeteilt.
+        </p>
+      </fieldset>
+
+      <label class="field">
+        <span>Kontoauszug (JSON)</span>
+        <input type="file" accept="application/json,.json" @change="handleFile" />
+      </label>
+
+      <p v-if="fileName" class="hint">Datei: {{ fileName }}</p>
+      <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="skippedOtherCurrency" class="hint">
+        {{ skippedOtherCurrency }} Transaktion(en) in anderer Währung übersprungen.
+      </p>
+
+      <template v-if="candidates.length">
+        <div class="import-summary">
+          <label class="participant-check">
+            <input type="checkbox" :checked="allSelected" @change="toggleAll" />
+            <span>Alle neuen auswählen</span>
+          </label>
+          <span>{{ selectedCount }} ausgewählt · {{ formatMoney(selectedTotal) }}</span>
+        </div>
+
+        <ul class="import-list">
+          <li
+            v-for="candidate in candidates"
+            :key="candidate.id"
+            class="import-row"
+            :class="{ disabled: !candidate.importable }"
+          >
+            <input
+              type="checkbox"
+              :checked="!!selected[candidate.id]"
+              :disabled="!candidate.importable"
+              @change="toggleCandidate(candidate.id)"
+            />
+            <div class="import-main">
+              <div class="import-top">
+                <span class="import-desc">{{ candidate.description }}</span>
+                <span class="import-amount">{{ formatMoney(candidate.amountCents) }}</span>
+              </div>
+              <div class="import-meta">
+                <span>{{ formatDate(candidate.date) }}</span>
+                <span v-if="candidate.partnerName">· {{ candidate.partnerName }}</span>
+                <span v-if="candidate.reason === 'credit'" class="badge badge-credit">
+                  Gutschrift
+                </span>
+                <span v-else-if="candidate.reason === 'zero'" class="badge badge-credit">
+                  Nicht importierbar
+                </span>
+                <span v-if="candidate.duplicate" class="badge badge-duplicate">
+                  Möglicherweise bereits importiert
+                </span>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </template>
+
+      <p v-if="importError" class="error">{{ importError }}</p>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" @click="emit('close')">Abbrechen</button>
+        <button type="submit" class="btn btn-primary" :disabled="!canImport">
+          {{ importing ? 'Importiere…' : `${selectedCount} Ausgaben importieren` }}
+        </button>
+      </div>
+    </form>
+  </div>
+</template>

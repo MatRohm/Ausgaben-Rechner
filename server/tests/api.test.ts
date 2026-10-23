@@ -87,6 +87,96 @@ describe('REST API', () => {
     expect(afterSettled.balances.every((balance) => balance.balanceCents === 0)).toBe(true);
   });
 
+  it('imports selected bank rows in one request', async () => {
+    const alice = await api<Person>(server.baseUrl, '/api/persons', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Import-Alice' }),
+    });
+    const bob = await api<Person>(server.baseUrl, '/api/persons', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Import-Bob' }),
+    });
+    const settle = await api<Settle>(server.baseUrl, '/api/settles', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Import settle' }),
+    });
+
+    const imported = await api<Expense[]>(server.baseUrl, '/api/expenses/import', {
+      method: 'POST',
+      body: JSON.stringify({
+        settleId: settle.id,
+        paidById: alice.id,
+        participants: [
+          { personId: alice.id, weight: 1 },
+          { personId: bob.id, weight: 1 },
+        ],
+        expenses: [
+          { description: 'Imported one', amountCents: 555, date: '2026-07-31' },
+          { description: 'Imported two', amountCents: 1234, date: '2026-07-30' },
+        ],
+      }),
+    });
+
+    expect(imported).toHaveLength(2);
+    expect(imported.map((expense) => expense.amountCents)).toEqual([555, 1234]);
+
+    const list = await api<Expense[]>(server.baseUrl, `/api/expenses?settleId=${settle.id}`);
+    expect(list).toHaveLength(2);
+  });
+
+  it('rolls back the import when a participant does not exist', async () => {
+    const person = await api<Person>(server.baseUrl, '/api/persons', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Import-Rollback' }),
+    });
+    const settle = await api<Settle>(server.baseUrl, '/api/settles', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Import rollback' }),
+    });
+
+    const response = await requestJson(server.baseUrl, '/api/expenses/import', {
+      method: 'POST',
+      body: JSON.stringify({
+        settleId: settle.id,
+        paidById: person.id,
+        participants: [{ personId: 999999, weight: 1 }],
+        expenses: [{ description: 'Should roll back', amountCents: 100, date: '2026-07-01' }],
+      }),
+    });
+
+    expect(response.status).toBe(400);
+    const list = await api<Expense[]>(server.baseUrl, `/api/expenses?settleId=${settle.id}`);
+    expect(list).toHaveLength(0);
+  });
+
+  it('rejects imports into a closed settle', async () => {
+    const person = await api<Person>(server.baseUrl, '/api/persons', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Import-Closed' }),
+    });
+    const settle = await api<Settle>(server.baseUrl, '/api/settles', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Import closed' }),
+    });
+
+    await api<Settle>(server.baseUrl, `/api/settles/${settle.id}/close`, {
+      method: 'POST',
+    });
+
+    const response = await requestJson(server.baseUrl, '/api/expenses/import', {
+      method: 'POST',
+      body: JSON.stringify({
+        settleId: settle.id,
+        paidById: person.id,
+        participants: [{ personId: person.id, weight: 1 }],
+        expenses: [{ description: 'Blocked', amountCents: 100, date: '2026-07-01' }],
+      }),
+    });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toMatchObject({ error: expect.stringMatching(/abgeschlossen/) });
+  });
+
   it('rejects writes to a closed settle', async () => {
     const person = await api<Person>(server.baseUrl, '/api/persons', {
       method: 'POST',

@@ -1,8 +1,15 @@
-export type { Expense, ExpenseInput, ExpenseParticipant } from './types.js';
+export type {
+  Expense,
+  ExpenseImportInput,
+  ExpenseImportRow,
+  ExpenseInput,
+  ExpenseParticipant,
+} from './types.js';
 export {
   createExpense,
   deleteExpense,
   getExpense,
+  importExpenses,
   listExpenses,
   setExpenseSettled,
   updateExpense,

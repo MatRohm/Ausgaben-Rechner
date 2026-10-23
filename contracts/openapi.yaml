@@ -261,6 +261,30 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
 
+  /api/expenses/import:
+    post:
+      operationId: importExpenses
+      tags:
+        - expenses
+      summary: Import selected bank statement rows as expenses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseImportInput'
+      responses:
+        '201':
+          description: Imported expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Expense'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
   /api/expenses/{id}:
     parameters:
       - $ref: '#/components/parameters/ExpenseId'
@@ -574,6 +598,48 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/ExpenseParticipantInput'
+
+    ExpenseImportRow:
+      type: object
+      additionalProperties: false
+      required:
+        - description
+        - amountCents
+        - date
+      properties:
+        description:
+          type: string
+          minLength: 1
+        amountCents:
+          type: integer
+          minimum: 1
+        date:
+          type: string
+          format: date
+
+    ExpenseImportInput:
+      type: object
+      additionalProperties: false
+      required:
+        - settleId
+        - paidById
+        - participants
+        - expenses
+      properties:
+        settleId:
+          type: integer
+        paidById:
+          type: integer
+        participants:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ExpenseParticipantInput'
+        expenses:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/ExpenseImportRow'
 
     SettledInput:
       type: object

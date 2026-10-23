@@ -135,6 +135,7 @@ docker run -d \
 - `GET/POST /api/settles`, `PATCH/DELETE /api/settles/:id`
 - `POST /api/settles/:id/close`, `POST /api/settles/:id/reopen`
 - `GET/POST /api/expenses?settleId=…`, `PATCH/DELETE /api/expenses/:id`
+- `POST /api/expenses/import` (ausgewählte Kontoauszug-Zeilen)
 - `PATCH /api/expenses/:id/settled` (`{ settled: boolean }`)
 - `GET /api/settlement/:settleId`
 - `GET /api/health`

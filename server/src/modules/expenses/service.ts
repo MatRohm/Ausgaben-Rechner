@@ -1,7 +1,7 @@
 import { AppError } from '../../shared/http.js';
 import { getSettle } from '../settles/index.js';
 import * as repository from './repository.js';
-import type { Expense, ExpenseInput } from './types.js';
+import type { Expense, ExpenseImportInput, ExpenseInput } from './types.js';
 
 function assertSettleOpen(settleId: number): void {
   const settle = getSettle(settleId);
@@ -22,6 +22,20 @@ export function getExpense(id: number): Expense | undefined {
 export function createExpense(input: ExpenseInput): Expense {
   assertSettleOpen(input.settleId);
   return repository.createExpense(input);
+}
+
+export function importExpenses(input: ExpenseImportInput): Expense[] {
+  assertSettleOpen(input.settleId);
+  return repository.createExpenses(
+    input.expenses.map((row) => ({
+      description: row.description,
+      amountCents: row.amountCents,
+      paidById: input.paidById,
+      settleId: input.settleId,
+      date: row.date,
+      participants: input.participants,
+    })),
+  );
 }
 
 export function updateExpense(id: number, input: ExpenseInput): Expense | undefined {

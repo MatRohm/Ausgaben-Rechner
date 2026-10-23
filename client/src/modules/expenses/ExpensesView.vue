@@ -5,6 +5,7 @@ import { personsApi } from '@/modules/persons';
 import { SettleSelect, useSettles } from '@/modules/settles';
 import { formatDate, formatMoney } from '@/shared/format';
 import { expensesApi } from './api';
+import ImportExpensesDialog from './ImportExpensesDialog.vue';
 import type { Expense, ExpenseDraft } from './types';
 import ExpenseForm from './ExpenseForm.vue';
 
@@ -15,11 +16,15 @@ const expenses = ref<Expense[]>([]);
 const loading = ref(true);
 const error = ref('');
 const showForm = ref(false);
+const showImport = ref(false);
 const editing = ref<Expense | null>(null);
 const resetKey = ref(0);
 const saveError = ref('');
 
 const selectedClosed = computed(() => !!selected.value?.closedAt);
+const canImport = computed(
+  () => selectedId.value != null && !selectedClosed.value && persons.value.length > 0,
+);
 
 async function loadExpenses() {
   if (selectedId.value == null) {
@@ -51,6 +56,9 @@ function selectId(v: number | null) {
 }
 
 watch(selectedId, loadExpenses);
+watch(selectedId, () => {
+  showImport.value = false;
+});
 
 onMounted(async () => {
   await Promise.all([loadSettles(), loadPersons()]);
@@ -127,19 +135,29 @@ async function toggleSettled(expense: Expense) {
 function participantsLabel(expense: Expense): string {
   return expense.participants.map((p) => p.name ?? '').join(', ');
 }
+
+async function handleImported() {
+  showImport.value = false;
+  await Promise.all([loadExpenses(), loadSettles()]);
+}
 </script>
 
 <template>
   <div class="view">
     <div class="view-header">
       <h1>Ausgaben</h1>
-      <button
-        class="btn btn-primary"
-        :disabled="selectedId == null || selectedClosed"
-        @click="openNew"
-      >
-        + Neue Ausgabe
-      </button>
+      <div class="header-actions">
+        <button class="btn btn-secondary" :disabled="!canImport" @click="showImport = true">
+          Aus Kontoauszug importieren
+        </button>
+        <button
+          class="btn btn-primary"
+          :disabled="selectedId == null || selectedClosed"
+          @click="openNew"
+        >
+          + Neue Ausgabe
+        </button>
+      </div>
     </div>
 
     <div class="toolbar">
@@ -208,5 +226,14 @@ function participantsLabel(expense: Expense): string {
         />
       </div>
     </div>
+
+    <ImportExpensesDialog
+      v-if="showImport && selectedId != null"
+      :persons="persons"
+      :settle-id="selectedId"
+      :existing-expenses="expenses"
+      @close="showImport = false"
+      @imported="handleImported"
+    />
   </div>
 </template>
