@@ -322,9 +322,26 @@ fieldset.field {
   word-break: break-word;
 }
 
+.import-description-input {
+  flex: 1;
+  min-width: 0;
+}
+
 .import-amount {
   font-weight: 700;
   white-space: nowrap;
+}
+
+.import-amount-input {
+  width: 110px;
+  text-align: right;
+}
+
+.import-row-error {
+  margin: 0.3rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--danger);
 }
 
 .import-meta {

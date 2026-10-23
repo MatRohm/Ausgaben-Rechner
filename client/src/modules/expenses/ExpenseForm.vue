@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import type { Person } from '@/modules/persons';
-import { todayISO } from '@/shared/format';
+import { formatCentsForInput, parseEuroToCents, todayISO } from '@/shared/format';
 import type { Expense, ExpenseDraft } from './types';
 
 const props = defineProps<{
@@ -25,12 +25,7 @@ const selected = ref<number[]>([]);
 const weights = ref<Record<number, number>>({});
 const formError = ref('');
 
-const amountCents = computed(() => {
-  const v = amountEuro.value.replace(',', '.');
-  const n = parseFloat(v);
-  if (Number.isNaN(n) || n <= 0) return 0;
-  return Math.round(n * 100);
-});
+const amountCents = computed(() => parseEuroToCents(amountEuro.value) ?? 0);
 
 // Reset for a brand-new entry. By default all persons are pre-selected,
 // and the payer/date are kept when continuing with "Speichern und neu".
@@ -48,7 +43,7 @@ function reset() {
   const exp = props.expense;
   if (exp) {
     description.value = exp.description;
-    amountEuro.value = (exp.amountCents / 100).toString().replace('.', ',');
+    amountEuro.value = formatCentsForInput(exp.amountCents);
     paidById.value = exp.paidById;
     date.value = exp.date;
     selected.value = exp.participants.map((p) => p.personId);

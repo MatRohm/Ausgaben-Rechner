@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { Person } from '@/modules/persons';
-import { formatDate, formatMoney } from '@/shared/format';
+import { formatCentsForInput, formatDate, formatMoney, parseEuroToCents } from '@/shared/format';
 import { expensesApi } from './api';
 import { parseStatementJson, type StatementCandidate } from './importStatement';
-import type { Expense } from './types';
+import type { Expense, ExpenseImportRow } from './types';
 
 interface PreviewCandidate extends StatementCandidate {
   duplicate: boolean;
+  amountInput: string;
 }
 
 const props = defineProps<{
@@ -41,8 +42,12 @@ const selectedCandidates = computed(() =>
 
 const selectedCount = computed(() => selectedCandidates.value.length);
 
+function parsedAmountCents(candidate: PreviewCandidate): number | null {
+  return parseEuroToCents(candidate.amountInput);
+}
+
 const selectedTotal = computed(() =>
-  selectedCandidates.value.reduce((sum, candidate) => sum + candidate.amountCents, 0),
+  selectedCandidates.value.reduce((sum, candidate) => sum + (parsedAmountCents(candidate) ?? 0), 0),
 );
 
 const allSelected = computed(
@@ -51,25 +56,51 @@ const allSelected = computed(
     selectableCandidates.value.every((candidate) => selected.value[candidate.id]),
 );
 
+function normalize(text: string): string {
+  return text.trim().toLocaleLowerCase('de-DE').replace(/\s+/g, ' ');
+}
+
+const existingExpenseKeys = computed(
+  () =>
+    new Set(
+      props.existingExpenses.map(
+        (expense) => `${expense.date}|${expense.amountCents}|${normalize(expense.description)}`,
+      ),
+    ),
+);
+
+function isDuplicate(candidate: PreviewCandidate): boolean {
+  const amountCents = parsedAmountCents(candidate);
+  if (!candidate.importable || amountCents == null) return false;
+  return existingExpenseKeys.value.has(
+    `${candidate.date}|${amountCents}|${normalize(candidate.description)}`,
+  );
+}
+
+function refreshCandidate(candidate: PreviewCandidate): void {
+  candidate.duplicate = isDuplicate(candidate);
+}
+
+function rowError(candidate: PreviewCandidate): string | null {
+  if (!candidate.importable) return null;
+  if (!candidate.description.trim()) return 'Name ist erforderlich.';
+  const amountCents = parsedAmountCents(candidate);
+  if (amountCents == null || amountCents <= 0) return 'Betrag muss größer als 0 sein.';
+  return null;
+}
+
+const invalidSelectedRows = computed(() =>
+  selectedCandidates.value.filter((candidate) => rowError(candidate) != null),
+);
+
 const canImport = computed(
   () =>
     paidById.value != null &&
     selectedParticipants.value.length > 0 &&
     selectedCount.value > 0 &&
+    invalidSelectedRows.value.length === 0 &&
     !importing.value,
 );
-
-function normalize(text: string): string {
-  return text.trim().toLocaleLowerCase('de-DE').replace(/\s+/g, ' ');
-}
-
-function duplicateKeys(): Set<string> {
-  return new Set(
-    props.existingExpenses.map(
-      (expense) => `${expense.date}|${expense.amountCents}|${normalize(expense.description)}`,
-    ),
-  );
-}
 
 function togglePerson(id: number): void {
   const index = selectedParticipants.value.indexOf(id);
@@ -111,13 +142,15 @@ async function handleFile(event: Event): Promise<void> {
 
   try {
     const parsed = parseStatementJson(await file.text());
-    const keys = duplicateKeys();
-    candidates.value = parsed.candidates.map((candidate) => ({
-      ...candidate,
-      duplicate:
-        candidate.importable &&
-        keys.has(`${candidate.date}|${candidate.amountCents}|${normalize(candidate.description)}`),
-    }));
+    candidates.value = parsed.candidates.map((candidate) => {
+      const preview: PreviewCandidate = {
+        ...candidate,
+        amountInput: formatCentsForInput(candidate.amountCents),
+        duplicate: false,
+      };
+      preview.duplicate = isDuplicate(preview);
+      return preview;
+    });
     for (const candidate of candidates.value) {
       selected.value[candidate.id] = candidate.importable && !candidate.duplicate;
     }
@@ -137,6 +170,20 @@ async function handleFile(event: Event): Promise<void> {
 async function submit(): Promise<void> {
   if (!canImport.value || paidById.value == null) return;
 
+  const rows: ExpenseImportRow[] = [];
+  for (const candidate of selectedCandidates.value) {
+    const amountCents = parsedAmountCents(candidate);
+    if (amountCents == null) {
+      importError.value = 'Bitte prüfe die markierten Beträge.';
+      return;
+    }
+    rows.push({
+      description: candidate.description.trim(),
+      amountCents,
+      date: candidate.date,
+    });
+  }
+
   importing.value = true;
   importError.value = '';
 
@@ -145,11 +192,7 @@ async function submit(): Promise<void> {
       settleId: props.settleId,
       paidById: paidById.value,
       participants: selectedParticipants.value.map((personId) => ({ personId, weight: 1 })),
-      expenses: selectedCandidates.value.map((candidate) => ({
-        description: candidate.description,
-        amountCents: candidate.amountCents,
-        date: candidate.date,
-      })),
+      expenses: rows,
     });
     emit('imported');
   } catch (e) {
@@ -212,6 +255,8 @@ async function submit(): Promise<void> {
           <span>{{ selectedCount }} ausgewählt · {{ formatMoney(selectedTotal) }}</span>
         </div>
 
+        <p class="hint">Name und Betrag der importierbaren Zeilen können angepasst werden.</p>
+
         <ul class="import-list">
           <li
             v-for="candidate in candidates"
@@ -227,8 +272,25 @@ async function submit(): Promise<void> {
             />
             <div class="import-main">
               <div class="import-top">
-                <span class="import-desc">{{ candidate.description }}</span>
-                <span class="import-amount">{{ formatMoney(candidate.amountCents) }}</span>
+                <input
+                  v-if="candidate.importable"
+                  v-model="candidate.description"
+                  class="import-description-input"
+                  type="text"
+                  aria-label="Name der Ausgabe"
+                  @input="refreshCandidate(candidate)"
+                />
+                <span v-else class="import-desc">{{ candidate.description }}</span>
+                <input
+                  v-if="candidate.importable"
+                  v-model="candidate.amountInput"
+                  class="import-amount-input"
+                  type="text"
+                  inputmode="decimal"
+                  aria-label="Betrag"
+                  @input="refreshCandidate(candidate)"
+                />
+                <span v-else class="import-amount">{{ formatMoney(candidate.amountCents) }}</span>
               </div>
               <div class="import-meta">
                 <span>{{ formatDate(candidate.date) }}</span>
@@ -243,6 +305,9 @@ async function submit(): Promise<void> {
                   Möglicherweise bereits importiert
                 </span>
               </div>
+              <p v-if="selected[candidate.id] && rowError(candidate)" class="import-row-error">
+                {{ rowError(candidate) }}
+              </p>
             </div>
           </li>
         </ul>
