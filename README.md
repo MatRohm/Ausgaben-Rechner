@@ -21,9 +21,15 @@ Eine schlichte Web-App, mit der eine kleine Gruppe von Personen gemeinsame Ausga
 ## Projektstruktur
 
 ```
-client/   Vue-Frontend
-server/   Express-API + SQLite
+client/   Vue-Frontend (app/, modules/, shared/)
+server/   Express-API + SQLite (app/, modules/, shared/)
+docs/     Architektur-Dokumentation
 ```
+
+Die Anwendungen sind als Modularer Monolith aufgebaut: Jedes fachliche Modul
+(`persons`, `settles`, `expenses`, `settlement`) besitzt eine öffentliche
+Schnittstelle (`index.ts`); interne Dateien sind für andere Module tabu. Die
+Details und Regeln stehen in `docs/architecture/README.md`.
 
 ## Lokale Entwicklung
 
@@ -36,6 +42,18 @@ npm run dev
 
 - Frontend: http://localhost:5173 (proxied `/api` → Backend)
 - Backend/API: http://localhost:3000
+
+## Prüfungen
+
+Die gleichen Prüfungen laufen in der CI (`.github/workflows/ci.yml`):
+
+```bash
+npm run typecheck    # Vue- und Server-TypeScript
+npm run arch:check   # Modulgrenzen und Abhängigkeitsrichtung
+npm test             # Unit- und API-Integrationstests
+npm run build        # Produktions-Build beider Workspaces
+npm run verify       # alles in CI-Reihenfolge
+```
 
 ## Produktion (Docker)
 

@@ -12,10 +12,18 @@
     "dev:server": "npm run dev -w server",
     "dev:client": "npm run dev -w client",
     "build": "npm run build -w client && npm run build -w server",
-    "start": "npm run start -w server"
+    "start": "npm run start -w server",
+    "typecheck": "npm run typecheck -w client && npm run typecheck -w server",
+    "test": "vitest run",
+    "arch:check": "npm run arch:check:client && npm run arch:check:server",
+    "arch:check:client": "depcruise client/src -c .dependency-cruiser.client.cjs",
+    "arch:check:server": "depcruise server/src -c .dependency-cruiser.server.cjs",
+    "verify": "npm run typecheck && npm run arch:check && npm test && npm run build"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "dependency-cruiser": "^18.7.0",
+    "vitest": "^5.0.5"
   },
   "engines": {
     "node": ">=20"
