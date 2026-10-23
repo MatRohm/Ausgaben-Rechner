@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "ausgaben",
+  "project_id": "61be8112-0e50-4b91-bfb6-26fdba7d69b9"
+}
