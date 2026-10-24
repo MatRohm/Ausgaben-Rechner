@@ -1,8 +1,7 @@
 import { test as base } from '@playwright/test';
 import { GenericContainer, Wait, type StartedTestContainer } from 'testcontainers';
 
-const imageTag = 'ausgaben-rechner:e2e';
-const repoRoot = process.cwd();
+const imageTag = process.env.E2E_IMAGE ?? 'ausgaben-rechner:e2e';
 
 interface AppFixture {
   baseUrl: string;
@@ -18,13 +17,9 @@ export const test = base.extend<Record<never, never>, { app: AppFixture }>({
         return;
       }
 
-      const image = await GenericContainer.fromDockerfile(repoRoot, 'Dockerfile')
-        .withCache(true)
-        .build(imageTag, { deleteOnExit: false });
-
       let container: StartedTestContainer | undefined;
       try {
-        container = await image
+        container = await new GenericContainer(imageTag)
           .withExposedPorts(3000)
           .withEnvironment({ PORT: '3000', DATA_DIR: '/app/data' })
           .withStartupTimeout(180_000)
