@@ -5,5 +5,11 @@ dist
 server/data
 data
 .git
+.beads
 *.log
 .env
+e2e
+playwright.config.ts
+playwright-report
+test-results
+blob-report

@@ -3,3 +3,6 @@ dist/
 package-lock.json
 .beads/
 client/src/shared/api-types.ts
+playwright-report/
+test-results/
+blob-report/

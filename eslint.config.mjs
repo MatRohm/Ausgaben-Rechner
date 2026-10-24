@@ -11,7 +11,15 @@ export default defineConfigWithVueTs(
   },
   {
     name: 'app/files-to-ignore',
-    ignores: ['**/dist/**', '**/node_modules/**', '.beads/**', 'client/src/shared/api-types.ts'],
+    ignores: [
+      '**/dist/**',
+      '**/node_modules/**',
+      '.beads/**',
+      'playwright-report/**',
+      'test-results/**',
+      'blob-report/**',
+      'client/src/shared/api-types.ts',
+    ],
   },
   js.configs.recommended,
   pluginVue.configs['flat/essential'],

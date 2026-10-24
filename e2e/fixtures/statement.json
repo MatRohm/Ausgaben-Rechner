@@ -1,0 +1,20 @@
+[
+  {
+    "booking": "2026-07-31T00:00:00.000+0200",
+    "amount": { "value": -1250, "precision": 2, "currency": "EUR" },
+    "reference": "POS Supermarkt",
+    "partnerName": "Supermarkt"
+  },
+  {
+    "booking": "2026-07-15T00:00:00.000+0200",
+    "amount": { "value": -500, "precision": 2, "currency": "EUR" },
+    "reference": "POS Bäckerei",
+    "partnerName": "Bäckerei"
+  },
+  {
+    "booking": "2026-07-30T00:00:00.000+0200",
+    "amount": { "value": 100000, "precision": 2, "currency": "EUR" },
+    "reference": "Lohn/Gehalt",
+    "partnerName": "Arbeitgeber"
+  }
+]

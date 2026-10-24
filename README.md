@@ -23,6 +23,7 @@ Eine schlichte Web-App, mit der eine kleine Gruppe von Personen gemeinsame Ausga
 ```
 client/   Vue-Frontend (app/, modules/, shared/)
 server/   Express-API + SQLite (app/, modules/, shared/)
+e2e/      Playwright-UI-Tests
 docs/     Architektur-Dokumentation
 ```
 
@@ -70,6 +71,38 @@ npm run verify            # alles in CI-Reihenfolge
 
 Der REST-Vertrag liegt in `contracts/openapi.yaml`; Details zur Generierung
 und zu den Contract-Tests stehen in `contracts/README.md`.
+
+### UI-Tests (Playwright)
+
+Die UI-Tests bauen das Produktions-Image aus dem vorhandenen `Dockerfile` und
+starten es mit [Testcontainers](https://node.testcontainers.org/) auf einem
+freien Port. Jeder Testlauf bekommt eine frische, flüchtige SQLite-Datenbank im
+Container; es wird kein Volume verwendet.
+
+Voraussetzungen:
+
+- Ein erreichbarer Docker-Daemon.
+- Chromium für Playwright: `npx playwright install chromium`.
+
+```bash
+npm run e2e          # Image bauen, Container starten, Tests ausführen
+npm run e2e:ui       # interaktiver Playwright-Modus
+```
+
+Für einen bereits laufenden Server (z. B. `npm start`) können die Tests ohne
+Container laufen:
+
+```bash
+E2E_BASE_URL=http://localhost:3005 npm run e2e
+```
+
+Dabei werden Testdaten in der laufenden Instanz angelegt. Für diesen Modus
+daher besser eine separate Instanz mit eigener `DATA_DIR` verwenden.
+
+Die Tests decken Personen, Abrechnungen, Ausgaben, Ausgleich und den
+Kontoauszug-Import ab. Fehlerberichte und Traces liegen nach einem Lauf unter
+`playwright-report/` bzw. `test-results/`. In der CI läuft zusätzlich ein
+separater `e2e`-Job.
 
 ## Produktion (Docker)
 

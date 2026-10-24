@@ -18,16 +18,21 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:install": "playwright install chromium",
+    "e2e:typecheck": "tsc --noEmit -p e2e/tsconfig.json",
     "contracts:generate": "openapi-typescript contracts/openapi.yaml -o client/src/shared/api-types.ts",
     "contracts:check": "node scripts/check-api-types.mjs",
     "arch:check": "npm run arch:check:client && npm run arch:check:server",
     "arch:check:client": "depcruise client/src -c .dependency-cruiser.client.cjs",
     "arch:check:server": "depcruise server/src -c .dependency-cruiser.server.cjs",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run contracts:check && npm run arch:check && npm test && npm run build"
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run contracts:check && npm run arch:check && npm run e2e:typecheck && npm test && npm run build"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^13.1.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.64.1",
     "@vue/eslint-config-prettier": "^10.2.0",
     "@vue/eslint-config-typescript": "^14.9.0",
     "ajv": "^8.20.0",
@@ -39,6 +44,7 @@
     "globals": "^17.13.0",
     "openapi-typescript": "^7.13.0",
     "prettier": "^3.9.10",
+    "testcontainers": "^12.2.1",
     "vitest": "^5.0.5"
   },
   "engines": {
