@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import type { Person } from '@/modules/persons';
-import { formatCentsForInput, parseEuroToCents, todayISO } from '@/shared/format';
+import { currentMonthISO, formatCentsForInput, parseEuroToCents } from '@/shared/format';
 import type { Expense, ExpenseDraft } from './types';
 
 const props = defineProps<{
@@ -20,7 +20,7 @@ const emit = defineEmits<{
 const description = ref('');
 const amountEuro = ref('');
 const paidById = ref<number | null>(null);
-const date = ref(todayISO());
+const date = ref(currentMonthISO());
 const selected = ref<number[]>([]);
 const weights = ref<Record<number, number>>({});
 const formError = ref('');
@@ -28,7 +28,7 @@ const formError = ref('');
 const amountCents = computed(() => parseEuroToCents(amountEuro.value) ?? 0);
 
 // Reset for a brand-new entry. By default all persons are pre-selected,
-// and the payer/date are kept when continuing with "Speichern und neu".
+// and the payer/month are kept when continuing with "Speichern und neu".
 function resetForNew(keepPayer: boolean) {
   description.value = '';
   amountEuro.value = '';
@@ -45,7 +45,7 @@ function reset() {
     description.value = exp.description;
     amountEuro.value = formatCentsForInput(exp.amountCents);
     paidById.value = exp.paidById;
-    date.value = exp.date;
+    date.value = exp.date.slice(0, 7);
     selected.value = exp.participants.map((p) => p.personId);
     weights.value = {};
     for (const p of exp.participants) weights.value[p.personId] = p.weight;
@@ -86,6 +86,10 @@ function buildPayload(): ExpenseDraft | null {
     formError.value = 'Bitte einen gültigen Betrag eingeben.';
     return null;
   }
+  if (!date.value) {
+    formError.value = 'Bitte Monat und Jahr auswählen.';
+    return null;
+  }
   if (!paidById.value) {
     formError.value = 'Bitte auswählen, wer bezahlt hat.';
     return null;
@@ -99,7 +103,7 @@ function buildPayload(): ExpenseDraft | null {
     description: description.value.trim(),
     amountCents: amountCents.value,
     paidById: paidById.value,
-    date: date.value,
+    date: `${date.value}-01`,
     participants: selected.value.map((id) => ({
       personId: id,
       weight: weights.value[id] ?? 1,
@@ -143,8 +147,8 @@ function submitNew() {
     </label>
 
     <label class="field">
-      <span>Datum</span>
-      <input v-model="date" type="date" />
+      <span>Monat</span>
+      <input v-model="date" type="month" />
     </label>
 
     <fieldset class="field">

@@ -83,18 +83,27 @@ db.exec(`
   );
 `);
 
+function normalizeExpenseDatesToMonth(): void {
+  db.prepare(
+    `UPDATE expenses
+     SET date = substr(date, 1, 7) || '-01'
+     WHERE length(date) = 10 AND substr(date, 9, 2) <> '01'`,
+  ).run();
+}
+
 const migrations: { id: string; up: () => void }[] = [
   {
     // Normalize full dates (YYYY-MM-DD) to the first of the month (YYYY-MM-01),
     // keeping a valid ISO date after the switch to month/year input.
     id: 'normalize-expense-dates-to-month',
-    up: () => {
-      db.prepare(
-        `UPDATE expenses
-         SET date = substr(date, 1, 7) || '-01'
-         WHERE length(date) = 10 AND substr(date, 9, 2) <> '01'`,
-      ).run();
-    },
+    up: normalizeExpenseDatesToMonth,
+  },
+  {
+    // The statement import briefly stored full transaction dates after the
+    // first migration had already been recorded. Re-run the idempotent update
+    // so existing rows from that period also follow the month-only invariant.
+    id: 'normalize-expense-dates-to-month-after-import',
+    up: normalizeExpenseDatesToMonth,
   },
 ];
 

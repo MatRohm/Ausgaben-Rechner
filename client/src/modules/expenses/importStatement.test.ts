@@ -9,14 +9,14 @@ const debit = {
 };
 
 const credit = {
-  booking: '2026-07-30T00:00:00.000+0200',
+  booking: '2026-06-30T00:00:00.000+0200',
   amount: { value: 273373, precision: 2, currency: 'EUR' },
   reference: 'Lohn/Gehalt',
   partnerName: 'Test Employer',
 };
 
 describe('parseStatementJson', () => {
-  it('maps debits and credits with dates and absolute cents', () => {
+  it('maps debits and credits with month dates and absolute cents', () => {
     const { candidates, skippedOtherCurrency } = parseStatementJson(
       JSON.stringify([debit, credit]),
     );
@@ -25,7 +25,7 @@ describe('parseStatementJson', () => {
     expect(candidates).toHaveLength(2);
     expect(candidates[0]).toMatchObject({
       id: 0,
-      date: '2026-07-31',
+      date: '2026-07-01',
       description: 'POS 5,55 Test Shop',
       partnerName: 'Test Shop',
       amountCents: 555,
@@ -34,7 +34,7 @@ describe('parseStatementJson', () => {
     expect(candidates[0].reason).toBeUndefined();
     expect(candidates[1]).toMatchObject({
       id: 1,
-      date: '2026-07-30',
+      date: '2026-06-01',
       description: 'Lohn/Gehalt',
       amountCents: 273373,
       importable: false,
@@ -42,7 +42,7 @@ describe('parseStatementJson', () => {
     });
   });
 
-  it('does not shift the date through a UTC conversion', () => {
+  it('maps the booking month to the first day of the month', () => {
     const { candidates } = parseStatementJson(
       JSON.stringify([
         {
@@ -100,7 +100,7 @@ describe('parseStatementJson', () => {
 
   it('rejects malformed transactions with their position', () => {
     expect(() => parseStatementJson(JSON.stringify([{ ...debit, booking: 'invalid' }]))).toThrow(
-      'Transaktion 1: Datum',
+      'Transaktion 1: Buchungsdatum',
     );
 
     expect(() =>

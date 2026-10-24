@@ -6,7 +6,7 @@ Eine schlichte Web-App, mit der eine kleine Gruppe von Personen gemeinsame Ausga
 
 - **Personen** manuell über die App verwalten (hinzufügen, umbenennen, entfernen).
 - **Abrechnungen** anlegen (z. B. pro Monat oder pro Urlaub) – mehrere parallel möglich.
-- **Ausgaben** erfassen: Beschreibung, Betrag, wer bezahlt hat, auf wen aufgeteilt (mit optionalen Anteilen/Gewichten) und in welcher Abrechnung.
+- **Ausgaben** erfassen: Beschreibung, Betrag, Monat, wer bezahlt hat, auf wen aufgeteilt (mit optionalen Anteilen/Gewichten) und in welcher Abrechnung.
 - **Abrechnung abschließen**: Eine abgeschlossene Abrechnung wird eingefroren (schreibgeschützt) und kann jederzeit wieder geöffnet werden.
 - **Ausgaben als „bezahlt“ markieren**: Einzelne Ausgaben können als beglichen markiert werden; sie fließen dann nicht mehr in die Ausgleichsberechnung ein, sondern werden separat ausgewiesen.
 - **Ausgleich**: automatische Berechnung der Kontostände und der minimalen Ausgleichszahlungen („wer überweist wem wie viel“) je Abrechnung.

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { formatCentsForInput, formatDate, formatMoney, parseEuroToCents, todayISO } from './format';
+import {
+  currentMonthISO,
+  formatCentsForInput,
+  formatMoney,
+  formatMonth,
+  parseEuroToCents,
+} from './format';
 
 describe('format utilities', () => {
   it('formats money in euro cents', () => {
@@ -7,10 +13,12 @@ describe('format utilities', () => {
     expect(formatMoney(1234)).toContain('12,34');
   });
 
-  it('formats ISO dates for the German UI', () => {
-    expect(formatDate('2025-01-15')).toBe('15.01.2025');
-    expect(formatDate('2025-01-15T00:00:00')).toBe('15.01.2025');
-    expect(formatDate('')).toBe('');
+  it('formats month/year for the German UI', () => {
+    expect(formatMonth('2025-01-15')).toBe('Januar 2025');
+    expect(formatMonth('2025-01')).toBe('Januar 2025');
+    expect(formatMonth('2025-12-01')).toBe('Dezember 2025');
+    expect(formatMonth('')).toBe('');
+    expect(formatMonth('keine Angabe')).toBe('keine Angabe');
   });
 
   it('parses euro input into integer cents', () => {
@@ -35,7 +43,7 @@ describe('format utilities', () => {
     expect(formatCentsForInput(500)).toBe('5,00');
   });
 
-  it('returns a local ISO date for today', () => {
-    expect(todayISO()).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  it('returns the current month as YYYY-MM', () => {
+    expect(currentMonthISO()).toMatch(/^\d{4}-\d{2}$/);
   });
 });

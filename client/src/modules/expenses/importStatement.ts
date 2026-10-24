@@ -55,10 +55,11 @@ export function parseStatementJson(text: string): ParsedStatement {
 
     const transaction = entry as RawTransaction;
     const booking = typeof transaction.booking === 'string' ? transaction.booking : '';
-    const date = booking.slice(0, 10);
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      throw new Error(`Transaktion ${position}: Datum fehlt oder ist ungültig.`);
+    const month = booking.slice(0, 7);
+    if (!/^\d{4}-\d{2}$/.test(month)) {
+      throw new Error(`Transaktion ${position}: Buchungsdatum fehlt oder ist ungültig.`);
     }
+    const date = `${month}-01`;
 
     const amount = transaction.amount;
     const value = typeof amount?.value === 'number' ? amount.value : NaN;

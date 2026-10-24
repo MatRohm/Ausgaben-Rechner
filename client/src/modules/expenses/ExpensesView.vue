@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import type { Person } from '@/modules/persons';
 import { personsApi } from '@/modules/persons';
 import { SettleSelect, useSettles } from '@/modules/settles';
-import { formatDate, formatMoney } from '@/shared/format';
+import { formatMonth, formatMoney } from '@/shared/format';
 import { expensesApi } from './api';
 import ImportExpensesDialog from './ImportExpensesDialog.vue';
 import type { Expense, ExpenseDraft } from './types';
@@ -190,7 +190,7 @@ async function handleImported() {
           <div class="expense-meta">
             <span>{{ e.paidByName }} hat bezahlt</span>
             <span>·</span>
-            <span>{{ formatDate(e.date) }}</span>
+            <span>{{ formatMonth(e.date) }}</span>
             <span v-if="e.settled" class="badge badge-paid">Bezahlt</span>
           </div>
           <div class="expense-split">Aufgeteilt auf: {{ participantsLabel(e) }}</div>

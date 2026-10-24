@@ -281,7 +281,10 @@ export interface components {
             paidById: number;
             paidByName: string;
             settleId: number;
-            /** Format: date */
+            /**
+             * Format: date
+             * @description First day of the expense month
+             */
             date: string;
             settled: boolean;
             /** @description SQLite datetime (UTC) */
@@ -293,14 +296,14 @@ export interface components {
             amountCents: number;
             paidById: number;
             settleId: number;
-            /** Format: date */
+            /** @description Month (YYYY-MM) or date; stored as the first day of the month */
             date: string;
             participants: components["schemas"]["ExpenseParticipantInput"][];
         };
         ExpenseImportRow: {
             description: string;
             amountCents: number;
-            /** Format: date */
+            /** @description Month (YYYY-MM) or date; stored as the first day of the month */
             date: string;
         };
         ExpenseImportInput: {

@@ -15,6 +15,7 @@ interface Settle {
 interface Expense {
   id: number;
   amountCents: number;
+  date: string;
   settled: boolean;
 }
 
@@ -111,14 +112,15 @@ describe('REST API', () => {
           { personId: bob.id, weight: 1 },
         ],
         expenses: [
-          { description: 'Imported one', amountCents: 555, date: '2026-07-31' },
-          { description: 'Imported two', amountCents: 1234, date: '2026-07-30' },
+          { description: 'Imported one', amountCents: 555, date: '2026-07' },
+          { description: 'Imported two', amountCents: 1234, date: '2026-06-30' },
         ],
       }),
     });
 
     expect(imported).toHaveLength(2);
     expect(imported.map((expense) => expense.amountCents)).toEqual([555, 1234]);
+    expect(imported.map((expense) => expense.date)).toEqual(['2026-07-01', '2026-06-01']);
 
     const list = await api<Expense[]>(server.baseUrl, `/api/expenses?settleId=${settle.id}`);
     expect(list).toHaveLength(2);

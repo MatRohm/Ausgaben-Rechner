@@ -169,7 +169,7 @@ describe('OpenAPI contract', () => {
           {
             description: 'Imported statement row',
             amountCents: 1500,
-            date: '2025-02-01',
+            date: '2025-02',
           },
         ],
       }),

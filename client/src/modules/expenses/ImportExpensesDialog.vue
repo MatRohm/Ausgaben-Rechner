@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import type { Person } from '@/modules/persons';
-import { formatCentsForInput, formatDate, formatMoney, parseEuroToCents } from '@/shared/format';
+import { formatCentsForInput, formatMoney, formatMonth, parseEuroToCents } from '@/shared/format';
 import { expensesApi } from './api';
 import { parseStatementJson, type StatementCandidate } from './importStatement';
 import type { Expense, ExpenseImportRow } from './types';
@@ -293,7 +293,7 @@ async function submit(): Promise<void> {
                 <span v-else class="import-amount">{{ formatMoney(candidate.amountCents) }}</span>
               </div>
               <div class="import-meta">
-                <span>{{ formatDate(candidate.date) }}</span>
+                <span>{{ formatMonth(candidate.date) }}</span>
                 <span v-if="candidate.partnerName">· {{ candidate.partnerName }}</span>
                 <span v-if="candidate.reason === 'credit'" class="badge badge-credit">
                   Gutschrift

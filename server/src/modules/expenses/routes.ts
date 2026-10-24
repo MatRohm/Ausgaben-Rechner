@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { sendError } from '../../shared/http.js';
+import { normalizeExpenseDate } from './date.js';
 import {
   createExpense,
   deleteExpense,
@@ -27,7 +28,9 @@ function parseExpenseInput(body: unknown): ExpenseInput | { error: string } {
   }
   if (!Number.isInteger(paidById)) return { error: 'Bezahler ist erforderlich.' };
   if (!Number.isInteger(settleId)) return { error: 'Abrechnung ist erforderlich.' };
-  if (!date) return { error: 'Datum ist erforderlich.' };
+
+  const normalizedDate = normalizeExpenseDate(date);
+  if (!normalizedDate) return { error: 'Bitte Monat und Jahr angeben.' };
 
   const parsedParticipants = participants.map((p) => {
     const pp = p as Record<string, unknown>;
@@ -53,7 +56,7 @@ function parseExpenseInput(body: unknown): ExpenseInput | { error: string } {
     amountCents,
     paidById,
     settleId,
-    date,
+    date: normalizedDate,
     participants: parsedParticipants,
   };
 }
@@ -111,11 +114,13 @@ function parseImportInput(body: unknown): ExpenseImportInput | { error: string }
     if (!Number.isInteger(amountCents) || amountCents <= 0) {
       return { error: `Ausgabe ${i + 1}: Betrag muss eine positive ganze Zahl (Cent) sein.` };
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      return { error: `Ausgabe ${i + 1}: Ungültiges Datum.` };
+
+    const normalizedDate = normalizeExpenseDate(date);
+    if (!normalizedDate) {
+      return { error: `Ausgabe ${i + 1}: Bitte Monat und Jahr angeben.` };
     }
 
-    parsedExpenses.push({ description, amountCents, date });
+    parsedExpenses.push({ description, amountCents, date: normalizedDate });
   }
 
   return { settleId, paidById, participants: parsedParticipants, expenses: parsedExpenses };
