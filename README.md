@@ -119,6 +119,10 @@ Der Workflow `.github/workflows/docker-release.yml` baut das Docker-Image bei je
 - **Push auf `main`** → Image wird nur **gebaut** (Build-Check), nicht veröffentlicht.
 - **Tag `v*`** (z. B. `v1.0.0`) → Image wird als `ghcr.io/<owner>/<repo>:v1.0.0` und `:latest` in die GitHub Container Registry (GHCR) hochgeladen und ein GitHub-Release mit Docker-Anleitung erstellt.
 
+Die Release-Notes werden dabei mit [git-cliff](https://git-cliff.org/) aus den
+Conventional Commits seit dem vorherigen `v*`-Tag erzeugt. Die Gruppierung und
+das Format stehen in `cliff.toml`.
+
 ```bash
 git tag v1.0.0
 git push origin v1.0.0

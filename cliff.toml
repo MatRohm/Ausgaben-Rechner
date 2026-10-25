@@ -1,0 +1,50 @@
+# git-cliff configuration for GitHub release notes.
+# https://git-cliff.org/docs/configuration
+
+[changelog]
+# `<REPO>` is replaced with the repository URL in the release workflow.
+body = """
+{% if version %}## What's Changed in {{ version }}{% else %}## What's Changed{% endif %}
+
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | striptags | trim | upper_first }}
+{% for commit in commits -%}
+- {% if commit.scope %}*({{ commit.scope }})* {% endif %}{% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](<REPO>/commit/{{ commit.id }}))
+{% endfor %}
+{% endfor %}
+
+{% if previous.version %}**Full Changelog**: [{{ previous.version }}...{{ version }}](<REPO>/compare/{{ previous.version }}...{{ version }}){% endif %}
+"""
+trim = true
+render_always = true
+postprocessors = []
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+require_conventional = false
+split_commits = false
+protect_breaking_commits = true
+commit_preprocessors = []
+commit_parsers = [
+  { message = "^feat", group = "<!-- 00 -->🚀 Features" },
+  { message = "^fix", group = "<!-- 01 -->🐛 Bug Fixes" },
+  { message = "^perf", group = "<!-- 02 -->⚡ Performance" },
+  { message = "^refactor", group = "<!-- 03 -->🚜 Refactoring" },
+  { message = "^docs", group = "<!-- 04 -->📚 Documentation" },
+  { message = "^test", group = "<!-- 05 -->🧪 Tests" },
+  { message = "^build", group = "<!-- 06 -->🏗️ Build" },
+  { message = "^ci", group = "<!-- 07 -->⚙️ CI/CD" },
+  { message = "^chore", group = "<!-- 08 -->🧹 Chores" },
+  { message = "^style", group = "<!-- 09 -->🎨 Styles" },
+  { message = "^revert", group = "<!-- 10 -->◀️ Reverts" },
+  { message = ".*", group = "<!-- 11 -->💼 Other" },
+]
+filter_commits = false
+fail_on_unmatched_commit = false
+link_parsers = []
+use_branch_tags = false
+topo_order = false
+topo_order_commits = true
+sort_commits = "oldest"
+recurse_submodules = false

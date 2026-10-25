@@ -65,33 +65,55 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          version: 'v2.14.2'
+          args: --latest --strip header
+        env:
+          OUTPUT: release-notes.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Add repository links and Docker instructions
+        run: |
+          sed -i "s#<REPO>#https://github.com/${GITHUB_REPOSITORY}#g" release-notes.md
+          printf '\n\n' >> release-notes.md
+          cat >> release-notes.md <<'EOF'
+          ## Docker-Image
+
+          Container abrufen:
+
+          ```bash
+          docker pull ${{ needs.build-and-push.outputs.image }}:${{ github.ref_name }}
+          ```
+
+          App starten (Daten bleiben im Volume erhalten):
+
+          ```bash
+          docker run -d \
+            --name ausgaben-rechner \
+            --restart unless-stopped \
+            -p 3000:3000 \
+            -v ausgaben-data:/app/data \
+            ${{ needs.build-and-push.outputs.image }}:${{ github.ref_name }}
+          ```
+
+          Danach ist die App unter http://localhost:3000 erreichbar.
+
+          Statt `${{ github.ref_name }}` kannst du auch `latest` verwenden, um immer das neueste Image zu ziehen:
+
+          ```bash
+          docker pull ${{ needs.build-and-push.outputs.image }}:latest
+          ```
+          EOF
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          body: |
-            ## Docker-Image
-
-            Container abrufen:
-
-            ```bash
-            docker pull ${{ needs.build-and-push.outputs.image }}:${{ github.ref_name }}
-            ```
-
-            App starten (Daten bleiben im Volume erhalten):
-
-            ```bash
-            docker run -d \
-              --name ausgaben-rechner \
-              --restart unless-stopped \
-              -p 3000:3000 \
-              -v ausgaben-data:/app/data \
-              ${{ needs.build-and-push.outputs.image }}:${{ github.ref_name }}
-            ```
-
-            Danach ist die App unter http://localhost:3000 erreichbar.
-
-            Statt `${{ github.ref_name }}` kannst du auch `latest` verwenden, um immer das neueste Image zu ziehen:
-
-            ```bash
-            docker pull ${{ needs.build-and-push.outputs.image }}:latest
-            ```
+          body_path: release-notes.md
