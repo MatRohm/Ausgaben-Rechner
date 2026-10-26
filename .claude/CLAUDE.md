@@ -97,7 +97,7 @@ bd prime                # Load the full workflow context
 bd ready                # Find available work
 bd show <id>            # View issue details
 bd update <id> --claim  # Claim work
-bd close <id>           # Complete work
+bd close <id>           # Complete work (only after user approval)
 ```
 
 ### Rules
@@ -113,6 +113,9 @@ bd close <id>           # Complete work
   given, create the one suggested in the plan once the user has agreed to it
   (see Planning). Committing against a closed issue is allowed when a fix for
   that issue is needed.
+- Do NOT close a beads issue immediately after finishing the work. Report the
+  result and ask the user for approval first. Keep the issue in progress until
+  the user explicitly approves it, then close it.
 
 ## Session Completion
 
@@ -122,7 +125,9 @@ subordinate to explicit user, repository, and orchestrator instructions.
 1. **Propose issues for remaining work** - Suggest beads for anything that needs
    follow-up; create them once the user agrees.
 2. **Run quality gates** (if code changed) - `npm run build`.
-3. **Update issue status** - Close finished work, update in-progress items.
+3. **Update issue status** - Leave finished work in progress and ask the user
+   for approval. Close the issue only after explicit approval; update other
+   in-progress items as needed.
 4. **Handle git/sync**:
 
    ```bash
