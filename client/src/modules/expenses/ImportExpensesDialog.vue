@@ -122,6 +122,51 @@ function toggleCandidate(id: number): void {
   selected.value[id] = !selected.value[id];
 }
 
+type EditableField = 'description' | 'amount';
+
+function editableInput(row: Element, field: EditableField): HTMLInputElement | null {
+  const selector = field === 'description' ? '.import-description-input' : '.import-amount-input';
+  return row.querySelector<HTMLInputElement>(selector);
+}
+
+function focusAndSelect(input: HTMLInputElement | null): void {
+  if (!input) return;
+  input.focus();
+  input.select();
+}
+
+function handleRowKeydown(event: KeyboardEvent, field: EditableField): void {
+  if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+
+  const input = event.currentTarget as HTMLInputElement;
+  const row = input.closest<HTMLElement>('.import-row');
+  if (!row) return;
+
+  if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+    event.preventDefault();
+    focusAndSelect(editableInput(row, event.key === 'ArrowLeft' ? 'description' : 'amount'));
+    return;
+  }
+
+  if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
+  event.preventDefault();
+
+  const rows = Array.from(
+    input.closest('.import-list')?.querySelectorAll<HTMLElement>('.import-row') ?? [],
+  );
+  const index = rows.indexOf(row);
+  if (index < 0) return;
+
+  const step = event.key === 'ArrowDown' ? 1 : -1;
+  for (let i = index + step; i >= 0 && i < rows.length; i += step) {
+    const target = editableInput(rows[i], field);
+    if (target) {
+      focusAndSelect(target);
+      return;
+    }
+  }
+}
+
 async function handleFile(event: Event): Promise<void> {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
@@ -292,6 +337,7 @@ async function submit(): Promise<void> {
                     type="text"
                     aria-label="Name der Ausgabe"
                     @input="refreshCandidate(candidate)"
+                    @keydown="handleRowKeydown($event, 'description')"
                   />
                   <span v-else class="import-desc">{{ candidate.description }}</span>
                 </div>
@@ -303,6 +349,7 @@ async function submit(): Promise<void> {
                   inputmode="decimal"
                   aria-label="Betrag"
                   @input="refreshCandidate(candidate)"
+                  @keydown="handleRowKeydown($event, 'amount')"
                 />
                 <span v-else class="import-amount">{{ formatMoney(candidate.amountCents) }}</span>
               </div>

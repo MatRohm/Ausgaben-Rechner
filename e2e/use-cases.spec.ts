@@ -1,4 +1,5 @@
 import path from 'node:path';
+import type { Locator } from '@playwright/test';
 import { expect, test } from './fixtures';
 import {
   acceptDialogs,
@@ -10,6 +11,18 @@ import {
 } from './support';
 
 const statementFile = path.join(process.cwd(), 'e2e', 'fixtures', 'statement.json');
+
+async function expectFocusedAndSelected(locator: Locator): Promise<void> {
+  await expect(locator).toBeFocused();
+  await expect
+    .poll(() =>
+      locator.evaluate((element) => {
+        const input = element as HTMLInputElement;
+        return input.selectionStart === 0 && input.selectionEnd === input.value.length;
+      }),
+    )
+    .toBe(true);
+}
 
 test('persons can be added, renamed, and removed', async ({ page, app }) => {
   const suffix = uniqueSuffix();
@@ -214,4 +227,49 @@ test('statement import supports editing the preview and flags duplicates', async
   const duplicates = duplicateDialog.locator('.badge-duplicate');
   await expect(duplicates).toHaveCount(1);
   await expect(duplicates).toContainText('Möglicherweise bereits importiert');
+});
+
+test('statement import navigates rows and fields with alt+arrow keys', async ({
+  page,
+  request,
+  app,
+}) => {
+  const suffix = uniqueSuffix();
+  const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);
+  const settle = await createSettle(request, app.baseUrl, `Keys ${suffix}`);
+
+  await page.goto(app.baseUrl);
+  await selectSettle(page, settle.name);
+  await page.getByRole('button', { name: 'Aus Kontoauszug importieren' }).click();
+
+  const dialog = page.locator('.import-modal');
+  await dialog.getByLabel('Bezahlt von').selectOption({ label: alice.name });
+  await dialog.getByLabel('Kontoauszug (JSON)').setInputFiles(statementFile);
+
+  const rows = dialog.locator('.import-row');
+  const firstDescription = rows.nth(0).getByLabel('Name der Ausgabe');
+  const firstAmount = rows.nth(0).getByLabel('Betrag');
+  const secondDescription = rows.nth(1).getByLabel('Name der Ausgabe');
+  const secondAmount = rows.nth(1).getByLabel('Betrag');
+
+  await firstDescription.focus();
+  await page.keyboard.press('Alt+ArrowRight');
+  await expectFocusedAndSelected(firstAmount);
+
+  await page.keyboard.press('Alt+ArrowDown');
+  await expectFocusedAndSelected(secondAmount);
+
+  await page.keyboard.press('Alt+ArrowLeft');
+  await expectFocusedAndSelected(secondDescription);
+
+  await page.keyboard.press('Alt+ArrowUp');
+  await expectFocusedAndSelected(firstDescription);
+
+  await page.keyboard.press('Alt+ArrowDown');
+  await expectFocusedAndSelected(secondDescription);
+
+  // Row 3 is not importable, so Alt+ArrowDown keeps focus on row 2.
+  await page.keyboard.press('Alt+ArrowDown');
+  await expectFocusedAndSelected(secondDescription);
+  await expect(dialog).toBeVisible();
 });
