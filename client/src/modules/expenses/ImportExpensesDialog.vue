@@ -183,14 +183,18 @@ function handleRowKeydown(event: KeyboardEvent, field: RowField): void {
   }
 }
 
-// Keep Alt+Left/Right from triggering browser back/forward while the dialog is open.
-function blockHistoryNavigation(event: KeyboardEvent): void {
+// Close on Escape and keep Alt+Left/Right from triggering browser history while open.
+function handleWindowKeydown(event: KeyboardEvent): void {
+  if (event.key === 'Escape') {
+    emit('close');
+    return;
+  }
   if (!event.altKey || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return;
   event.preventDefault();
 }
 
-onMounted(() => window.addEventListener('keydown', blockHistoryNavigation, true));
-onUnmounted(() => window.removeEventListener('keydown', blockHistoryNavigation, true));
+onMounted(() => window.addEventListener('keydown', handleWindowKeydown, true));
+onUnmounted(() => window.removeEventListener('keydown', handleWindowKeydown, true));
 
 async function handleFile(event: Event): Promise<void> {
   const input = event.target as HTMLInputElement;

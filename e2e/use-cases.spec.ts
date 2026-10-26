@@ -294,3 +294,25 @@ test('statement import navigates rows and fields with alt+arrow keys', async ({
   await expect(dialog).toBeVisible();
   await expect(page).toHaveURL(urlBefore);
 });
+
+test('escape closes the expense form and import dialog', async ({ page, request, app }) => {
+  const suffix = uniqueSuffix();
+  await createPerson(request, app.baseUrl, `Alice ${suffix}`);
+  const settle = await createSettle(request, app.baseUrl, `Esc ${suffix}`);
+
+  await page.goto(app.baseUrl);
+  await selectSettle(page, settle.name);
+
+  await page.getByRole('button', { name: '+ Neue Ausgabe' }).click();
+  await expect(page.getByRole('heading', { name: 'Neue Ausgabe' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('heading', { name: 'Neue Ausgabe' })).toBeHidden();
+
+  await page.getByRole('button', { name: 'Aus Kontoauszug importieren' }).click();
+  const importDialog = page.locator('.import-modal');
+  await expect(
+    importDialog.getByRole('heading', { name: 'Aus Kontoauszug importieren' }),
+  ).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(importDialog).toBeHidden();
+});

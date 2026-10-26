@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import type { Person } from '@/modules/persons';
 import { currentMonthISO, formatCentsForInput, parseEuroToCents } from '@/shared/format';
 import ExpenseIcon from './ExpenseIcon.vue';
@@ -66,6 +66,13 @@ watch(
     if (key) resetForNew(true);
   },
 );
+
+function handleEscape(event: KeyboardEvent): void {
+  if (event.key === 'Escape') emit('cancel');
+}
+
+onMounted(() => window.addEventListener('keydown', handleEscape));
+onUnmounted(() => window.removeEventListener('keydown', handleEscape));
 
 function togglePerson(id: number) {
   const idx = selected.value.indexOf(id);
