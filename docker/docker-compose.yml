@@ -1,6 +1,10 @@
+name: ausgaben-rechner
+
 services:
   app:
-    build: .
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
     container_name: ausgaben-rechner
     ports:
       - '3000:3000'

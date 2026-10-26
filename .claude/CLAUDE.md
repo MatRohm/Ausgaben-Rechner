@@ -35,11 +35,11 @@ TypeScript backend with a SQLite database.
 - Follow the repository's `.editorconfig` (2-space indent, LF line endings).
 - Prefer strict TypeScript; avoid `any` unless necessary.
 - Use the Vue 3 Composition API (`<script setup lang="ts">`).
-- Keep the frontend layered consistently: API calls in `client/src/api.ts`,
-  shared state in `client/src/composables/`, pages in `client/src/views/`,
-  reusable pieces in `client/src/components/`.
-- Keep the backend layered consistently: routes in `server/src/routes/`,
-  data access in `server/src/repository.ts`, types in `server/src/types.ts`.
+- Keep the frontend layered consistently: API calls in `src/client/src/api.ts`,
+  shared state in `src/client/src/composables/`, pages in `src/client/src/views/`,
+  reusable pieces in `src/client/src/components/`.
+- Keep the backend layered consistently: routes in `src/server/src/routes/`,
+  data access in `src/server/src/repository.ts`, types in `src/server/src/types.ts`.
 - Amounts are stored as integer cents (`amountCents`) to avoid floating-point
   errors.
 

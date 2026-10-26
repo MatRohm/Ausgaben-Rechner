@@ -1,8 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './e2e',
-  outputDir: 'test-results',
+  testDir: './src/tests/e2e',
+  outputDir: '.artifacts/playwright/results',
   fullyParallel: false,
   workers: 1,
   forbidOnly: !!process.env.CI,
@@ -10,8 +10,8 @@ export default defineConfig({
   timeout: 300_000,
   expect: { timeout: 10_000 },
   reporter: process.env.CI
-    ? [['github'], ['html', { open: 'never' }]]
-    : [['list'], ['html', { open: 'never' }]],
+    ? [['github'], ['html', { open: 'never', outputFolder: '.artifacts/playwright/report' }]]
+    : [['list'], ['html', { open: 'never', outputFolder: '.artifacts/playwright/report' }]],
   use: {
     actionTimeout: 10_000,
     navigationTimeout: 15_000,

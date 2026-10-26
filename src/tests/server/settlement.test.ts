@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { Expense } from '../src/modules/expenses/index';
-import type { Person } from '../src/modules/persons/index';
-import { calculateSettlement } from '../src/modules/settlement/calc';
+import type { Expense } from '../../server/src/modules/expenses/index';
+import type { Person } from '../../server/src/modules/persons/index';
+import { calculateSettlement } from '../../server/src/modules/settlement/calc';
 
 const persons: Person[] = [
   { id: 1, name: 'Alice' },

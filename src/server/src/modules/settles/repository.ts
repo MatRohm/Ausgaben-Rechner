@@ -3,7 +3,7 @@ import type { Settle } from './types.js';
 
 // The aggregate columns read the expenses table directly. This is a deliberate
 // read-only coupling on the shared SQLite schema; writes to expenses still go
-// exclusively through the expenses module. See docs/architecture/README.md.
+// exclusively through the expenses module. See docs/architecture.md.
 const settleSelect = `
   SELECT s.id, s.name, s.created_at AS createdAt, s.closed_at AS closedAt,
          COUNT(e.id) AS expenseCount,

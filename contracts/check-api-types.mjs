@@ -10,8 +10,8 @@ const HEADER = `/**
 
 `;
 
-const specUrl = new URL('../contracts/openapi.yaml', import.meta.url);
-const typesUrl = new URL('../client/src/shared/api-types.ts', import.meta.url);
+const specUrl = new URL('./openapi.yaml', import.meta.url);
+const typesUrl = new URL('../src/client/src/shared/api-types.ts', import.meta.url);
 
 const ast = await openapiTS(specUrl);
 const expected = HEADER + astToString(ast);
@@ -19,7 +19,7 @@ const actual = await readFile(typesUrl, 'utf8');
 
 if (actual !== expected) {
   console.error(
-    'client/src/shared/api-types.ts is stale. Run `npm run contracts:generate` and commit the result.',
+    'src/client/src/shared/api-types.ts is stale. Run `npm run contracts:generate` and commit the result.',
   );
   process.exit(1);
 }

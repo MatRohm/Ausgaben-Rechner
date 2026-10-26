@@ -14,25 +14,25 @@ REST API.
 | `expenses`   | Expenses, payer, participants, weights, paid state, and statement import | `modules/expenses/index.ts`   |
 | `settlement` | Balance and transfer calculation for one settle                          | `modules/settlement/index.ts` |
 
-The same four modules exist in `client/src/modules/` and
-`server/src/modules/`. Module names and ownership are intentionally aligned,
+The same four modules exist in `src/client/src/modules/` and
+`src/server/src/modules/`. Module names and ownership are intentionally aligned,
 but the two applications never import each other's code.
 
 ### Dependency direction
 
 ```text
-client/src/app ──────────────► client/src/modules/* (public index only)
-client/src/modules/* ────────► client/src/shared
-client/src/modules/expenses ─► client/src/modules/persons (public)
-client/src/modules/expenses ─► client/src/modules/settles (public)
-client/src/modules/settlement ► client/src/modules/expenses (public, type-only)
-client/src/modules/settlement ► client/src/modules/settles (public)
+src/client/src/app ──────────────► src/client/src/modules/* (public index only)
+src/client/src/modules/* ────────► src/client/src/shared
+src/client/src/modules/expenses ─► src/client/src/modules/persons (public)
+src/client/src/modules/expenses ─► src/client/src/modules/settles (public)
+src/client/src/modules/settlement ► src/client/src/modules/expenses (public, type-only)
+src/client/src/modules/settlement ► src/client/src/modules/settles (public)
 
-server/src/app ──────────────► server/src/modules/* (public index only)
-server/src/modules/expenses ─► server/src/modules/settles (public)
-server/src/modules/settlement ► server/src/modules/expenses (public)
-server/src/modules/settlement ► server/src/modules/persons (public)
-server/src/modules/* ────────► server/src/shared
+src/server/src/app ──────────────► src/server/src/modules/* (public index only)
+src/server/src/modules/expenses ─► src/server/src/modules/settles (public)
+src/server/src/modules/settlement ► src/server/src/modules/expenses (public)
+src/server/src/modules/settlement ► src/server/src/modules/persons (public)
+src/server/src/modules/* ────────► src/server/src/shared
 ```
 
 Dependencies must stay acyclic. The graph above is the intended direction; the
@@ -54,7 +54,7 @@ Each backend module follows the same shape where the module needs it:
 `routes.ts` must not import `repository.ts`; it calls `service.ts`.
 `service.ts` must not import Express. `types.ts` must not import Express or the
 database driver. The SQLite connection and schema bootstrap live in
-`server/src/shared/database.ts`; module repositories are the only module files
+`src/server/src/shared/database.ts`; module repositories are the only module files
 that query their tables.
 
 ## Frontend layers
@@ -90,7 +90,7 @@ on:
 
 `npm run contracts:check` recomputes the client types from
 `contracts/openapi.yaml` and fails when the committed file is stale.
-`server/tests/contracts.test.ts` validates the spec and every documented response
+`src/tests/server/contracts.test.ts` validates the spec and every documented response
 body against it.
 
 The rules are defined in `.dependency-cruiser.cjs` (with per-workspace
@@ -124,9 +124,9 @@ two checks do not duplicate each other.
   dependency, which would create a module cycle. If this grows, extract a
   read model outside both modules.
 - **Generated REST types:** the client consumes `contracts/openapi.yaml` through
-  generated types in `client/src/shared/api-types.ts`; the module `types.ts`
+  generated types in `src/client/src/shared/api-types.ts`; the module `types.ts`
   files alias the generated schemas. The server keeps its own internal types,
-  and `server/tests/contracts.test.ts` validates real responses against the
+  and `src/tests/server/contracts.test.ts` validates real responses against the
   published contract. Regenerate with `npm run contracts:generate`; CI fails if
   the committed types are stale.
 
@@ -142,9 +142,9 @@ the client bundle.
 ## Adding a module
 
 1. Pick a business capability, not a technical layer.
-2. Create `client/src/modules/<name>/` and/or `server/src/modules/<name>/`.
+2. Create `src/client/src/modules/<name>/` and/or `src/server/src/modules/<name>/`.
 3. Add an `index.ts` that exports only what other modules genuinely need.
-4. Add the dependency edge to `docs/architecture/README.md` and, if it is a new
+4. Add the dependency edge to `docs/architecture.md` and, if it is a new
    permitted direction, make sure it does not create a cycle.
 5. Wire the router (server) and router/pages (client) through `app/`.
 6. Run `npm run verify`.

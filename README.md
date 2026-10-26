@@ -21,16 +21,22 @@ Eine schlichte Web-App, mit der eine kleine Gruppe von Personen gemeinsame Ausga
 ## Projektstruktur
 
 ```
-client/   Vue-Frontend (app/, modules/, shared/)
-server/   Express-API + SQLite (app/, modules/, shared/)
-e2e/      Playwright-UI-Tests
-docs/     Architektur-Dokumentation
+src/
+  client/   Vue-Frontend (app/, modules/, shared/)
+  server/   Express-API + SQLite (app/, modules/, shared/)
+  tests/
+    e2e/    Playwright-UI-Tests
+    server/ Server-Unit- und Integrationstests
+contracts/  OpenAPI-Vertrag und Contract-Check
+docs/       Architektur-Dokumentation
+config/     Tool-Konfiguration (dependency-cruiser)
+docker/     Dockerfile und Docker Compose
 ```
 
 Die Anwendungen sind als Modularer Monolith aufgebaut: Jedes fachliche Modul
 (`persons`, `settles`, `expenses`, `settlement`) besitzt eine öffentliche
 Schnittstelle (`index.ts`); interne Dateien sind für andere Module tabu. Die
-Details und Regeln stehen in `docs/architecture/README.md`.
+Details und Regeln stehen in `docs/architecture.md`.
 
 ## Lokale Entwicklung
 
@@ -74,10 +80,11 @@ und zu den Contract-Tests stehen in `contracts/README.md`.
 
 ### UI-Tests (Playwright)
 
-Die UI-Tests bauen das Produktions-Image aus dem vorhandenen `Dockerfile` und
-starten es mit [Testcontainers](https://node.testcontainers.org/) auf einem
-freien Port. Jeder Testlauf bekommt eine frische, flüchtige SQLite-Datenbank im
-Container; es wird kein Volume verwendet.
+Die UI-Tests bauen das Produktions-Image aus dem vorhandenen
+`docker/Dockerfile` und starten es mit
+[Testcontainers](https://node.testcontainers.org/) auf einem freien Port. Jeder
+Testlauf bekommt eine frische, flüchtige SQLite-Datenbank im Container; es wird
+kein Volume verwendet.
 
 Voraussetzungen:
 
@@ -101,19 +108,20 @@ daher besser eine separate Instanz mit eigener `DATA_DIR` verwenden.
 
 Die Tests decken Personen, Abrechnungen, Ausgaben, Ausgleich und den
 Kontoauszug-Import ab. Fehlerberichte und Traces liegen nach einem Lauf unter
-`playwright-report/` bzw. `test-results/`. In der CI läuft zusätzlich ein
-separater `e2e`-Job.
+`.artifacts/playwright/report/` bzw. `.artifacts/playwright/results/`. In der CI
+läuft zusätzlich ein separater `e2e`-Job.
 
-Die Tests sind thematisch unter `e2e/specs/` gruppiert. Seitenaktionen liegen in
-`e2e/pages/` (PageObjects), untergeordnete Elemente wie Dialoge, Zeilen und
-Karten in `e2e/controls/` (ControlObjects). Die Specs arbeiten ausschließlich
+Die Tests sind thematisch unter `src/tests/e2e/specs/` gruppiert. Seitenaktionen
+liegen in `src/tests/e2e/pages/` (PageObjects), untergeordnete Elemente wie
+Dialoge, Zeilen und Karten in `src/tests/e2e/controls/` (ControlObjects). Die
+Specs arbeiten ausschließlich
 mit diesen Objekten. Jeder Test folgt dem ARRANGE-ACT-ASSERT-Muster mit genau
 einem Block je Phase; weitere Zustandswechsel werden in eigene Tests aufgeteilt.
 
 ## Produktion (Docker)
 
 ```bash
-docker compose up -d --build
+docker compose -f docker/docker-compose.yml up -d --build
 ```
 
 Die App ist dann unter http://localhost:3000 erreichbar. Die SQLite-Datei liegt im Docker-Volume `ausgaben-data` und bleibt über Neustarts erhalten.
@@ -127,7 +135,7 @@ Der Workflow `.github/workflows/docker-release.yml` baut das Docker-Image bei je
 
 Die Release-Notes werden dabei mit [git-cliff](https://git-cliff.org/) aus den
 Conventional Commits seit dem vorherigen `v*`-Tag erzeugt. Die Gruppierung und
-das Format stehen in `cliff.toml`.
+das Format stehen in `.github/cliff.toml`.
 
 ```bash
 git tag v1.0.0

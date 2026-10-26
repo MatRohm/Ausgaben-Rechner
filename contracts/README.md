@@ -11,7 +11,7 @@ The client consumes the contract through generated TypeScript types:
 npm run contracts:generate
 ```
 
-This writes `client/src/shared/api-types.ts`. Do not edit that file by hand.
+This writes `src/client/src/shared/api-types.ts`. Do not edit that file by hand.
 The module `types.ts` files alias the generated `components["schemas"][...]`
 entries, so client code keeps readable names while staying tied to the spec.
 
@@ -20,7 +20,7 @@ committed copy is stale. It runs in `npm run verify` and in CI.
 
 ## Contract tests
 
-`server/tests/contracts.test.ts`:
+`src/tests/server/contracts.test.ts`:
 
 1. validates `contracts/openapi.yaml` with `@apidevtools/swagger-parser`;
 2. starts the real Express app against a temporary SQLite database;
@@ -28,7 +28,7 @@ committed copy is stale. It runs in `npm run verify` and in CI.
    body with Ajv against the dereferenced OpenAPI schema;
 4. validates at least one documented error response.
 
-The server keeps its own internal types (`server/src/modules/*/types.ts`) rather
+The server keeps its own internal types (`src/server/src/modules/*/types.ts`) rather
 than importing client code. The contract test is what catches drift between the
 server's implementation and the published contract.
 

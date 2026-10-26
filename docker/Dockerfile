@@ -4,13 +4,13 @@ WORKDIR /app
 
 # Install dependencies first (better layer caching)
 COPY package.json ./
-COPY server/package.json server/
-COPY client/package.json client/
+COPY src/server/package.json src/server/
+COPY src/client/package.json src/client/
 RUN npm install
 
 # Copy source and build both workspaces
-COPY server server
-COPY client client
+COPY src/server src/server
+COPY src/client src/client
 RUN npm run build
 
 # ---- Runtime stage ----
@@ -20,16 +20,16 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY package.json ./
-COPY server/package.json server/
-COPY client/package.json client/
+COPY src/server/package.json src/server/
+COPY src/client/package.json src/client/
 RUN npm install --omit=dev && npm cache clean --force
 
 # Copy build artifacts
-COPY --from=build /app/server/dist server/dist
-COPY --from=build /app/client/dist client/dist
+COPY --from=build /app/src/server/dist src/server/dist
+COPY --from=build /app/src/client/dist src/client/dist
 
 ENV PORT=3000
 ENV DATA_DIR=/app/data
 EXPOSE 3000
 
-CMD ["node", "server/dist/index.js"]
+CMD ["node", "src/server/dist/index.js"]

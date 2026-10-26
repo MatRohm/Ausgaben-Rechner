@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeExpenseDate } from '../src/modules/expenses/date';
+import { normalizeExpenseDate } from '../../server/src/modules/expenses/date';
 
 describe('normalizeExpenseDate', () => {
   it('normalizes months and full dates to the first day of the month', () => {

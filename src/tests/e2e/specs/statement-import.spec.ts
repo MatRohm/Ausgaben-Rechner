@@ -4,7 +4,7 @@ import { test } from '../fixtures';
 import { ExpensesPageObject } from '../pages/ExpensesPageObject';
 import { createExpense, createPerson, createSettle, uniqueSuffix } from '../support';
 
-const statementFile = path.join(process.cwd(), 'e2e', 'fixtures', 'statement.json');
+const statementFile = path.join(process.cwd(), 'src', 'tests', 'e2e', 'fixtures', 'statement.json');
 
 async function arrangeImport(
   page: Page,

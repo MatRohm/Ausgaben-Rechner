@@ -25,7 +25,7 @@ export async function startTestServer(): Promise<TestServer> {
   process.env.DATA_DIR = dataDir;
 
   // Import after DATA_DIR is set: the database module initializes on import.
-  const { createApp } = await import('../src/app/app');
+  const { createApp } = await import('../../server/src/app/app');
   const app = createApp();
   const server = await new Promise<Server>((resolve) => {
     const instance = app.listen(0, () => resolve(instance));
@@ -38,7 +38,7 @@ export async function startTestServer(): Promise<TestServer> {
       await new Promise<void>((resolve, reject) => {
         server.close((error) => (error ? reject(error) : resolve()));
       });
-      const { closeDatabase } = await import('../src/shared/database');
+      const { closeDatabase } = await import('../../server/src/shared/database');
       closeDatabase();
       rmSync(dataDir, { recursive: true, force: true });
       if (previousDataDir === undefined) delete process.env.DATA_DIR;
