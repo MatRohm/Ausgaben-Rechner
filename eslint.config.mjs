@@ -17,6 +17,7 @@ export default defineConfigWithVueTs(
       '.beads/**',
       '.artifacts/**',
       'src/client/src/shared/api-types.ts',
+      'src/server/src/generated/**',
     ],
   },
   js.configs.recommended,

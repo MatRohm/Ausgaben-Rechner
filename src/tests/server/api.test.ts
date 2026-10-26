@@ -268,9 +268,11 @@ describe('REST API', () => {
     expect(docs.headers.get('content-type')).toContain('text/html');
     expect(await docs.text()).toContain('SwaggerUIBundle');
 
-    const spec = await fetch(`${server.baseUrl}/api/openapi.yaml`);
+    const spec = await fetch(`${server.baseUrl}/api/openapi.json`);
     expect(spec.status).toBe(200);
-    expect(await spec.text()).toContain('openapi: 3.1.0');
+    expect(spec.headers.get('content-type')).toContain('application/json');
+    const document = (await spec.json()) as { openapi: string };
+    expect(document.openapi).toMatch(/^3\./);
 
     const asset = await fetch(`${server.baseUrl}/api/swagger-ui/swagger-ui.css`);
     expect(asset.status).toBe(200);

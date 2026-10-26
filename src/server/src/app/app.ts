@@ -1,12 +1,11 @@
 import cors from 'cors';
-import express from 'express';
+import express, { type NextFunction, type Request, type Response } from 'express';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { expensesRouter } from '../modules/expenses/index.js';
-import { personsRouter } from '../modules/persons/index.js';
-import { settlementRouter } from '../modules/settlement/index.js';
-import { settlesRouter } from '../modules/settles/index.js';
+import { ValidateError } from 'tsoa';
+import { RegisterRoutes } from '../generated/routes.js';
+import { AppError } from '../shared/http.js';
 import { registerApiDocs } from './swagger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -22,15 +21,7 @@ export function createApp(): express.Express {
   app.use(express.json());
 
   registerApiDocs(app);
-
-  app.use('/api/persons', personsRouter);
-  app.use('/api/expenses', expensesRouter);
-  app.use('/api/settlement', settlementRouter);
-  app.use('/api/settles', settlesRouter);
-
-  app.get('/api/health', (_req, res) => {
-    res.json({ ok: true });
-  });
+  RegisterRoutes(app);
 
   // Serve the built client (when present) for production SPA routing.
   const clientDist = path.resolve(__dirname, '../../../client/dist');
@@ -44,6 +35,20 @@ export function createApp(): express.Express {
       res.sendFile(path.join(clientDist, 'index.html'));
     });
   }
+
+  app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    if (error instanceof AppError) {
+      res.status(error.status).json({ error: error.message });
+      return;
+    }
+    if (error instanceof ValidateError) {
+      res.status(400).json({ error: 'Ungültige Anfrage.' });
+      return;
+    }
+
+    console.error(error);
+    res.status(500).json({ error: 'Interner Serverfehler.' });
+  });
 
   return app;
 }

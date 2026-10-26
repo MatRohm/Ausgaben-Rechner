@@ -76,8 +76,9 @@ npm run build             # Produktions-Build beider Workspaces
 npm run verify            # alles in CI-Reihenfolge
 ```
 
-Der REST-Vertrag liegt in `contracts/openapi.yaml`; Details zur Generierung
-und zu den Contract-Tests stehen in `contracts/README.md`.
+Der REST-Vertrag wird mit tsoa aus den Controllern und Modell-Annotationen
+generiert; Details zur Generierung und zu den Contract-Tests stehen in
+`contracts/README.md`.
 
 ### UI-Tests (Playwright)
 

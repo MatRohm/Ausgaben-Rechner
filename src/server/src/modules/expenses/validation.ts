@@ -1,19 +1,7 @@
-import { Router } from 'express';
-import { sendError } from '../../shared/http.js';
 import { normalizeExpenseDate } from './date.js';
-import {
-  createExpense,
-  deleteExpense,
-  importExpenses,
-  listExpenses,
-  setExpenseSettled,
-  updateExpense,
-} from './service.js';
 import type { ExpenseImportInput, ExpenseImportRow, ExpenseInput } from './types.js';
 
-export const expensesRouter = Router();
-
-function parseExpenseInput(body: unknown): ExpenseInput | { error: string } {
+export function parseExpenseInput(body: unknown): ExpenseInput | { error: string } {
   const b = body as Record<string, unknown>;
   const description = typeof b?.description === 'string' ? b.description.trim() : '';
   const amountCents = Number(b?.amountCents);
@@ -64,7 +52,7 @@ function parseExpenseInput(body: unknown): ExpenseInput | { error: string } {
   };
 }
 
-function parseImportInput(body: unknown): ExpenseImportInput | { error: string } {
+export function parseImportInput(body: unknown): ExpenseImportInput | { error: string } {
   const b = body as Record<string, unknown>;
   const settleId = Number(b?.settleId);
   const paidById = Number(b?.paidById);
@@ -131,72 +119,3 @@ function parseImportInput(body: unknown): ExpenseImportInput | { error: string }
 
   return { settleId, paidById, participants: parsedParticipants, expenses: parsedExpenses };
 }
-
-expensesRouter.get('/', (req, res) => {
-  const settleId = req.query.settleId != null ? Number(req.query.settleId) : undefined;
-  res.json(listExpenses(settleId));
-});
-
-expensesRouter.post('/import', (req, res) => {
-  const input = parseImportInput(req.body);
-  if ('error' in input) {
-    res.status(400).json({ error: input.error });
-    return;
-  }
-  try {
-    res.status(201).json(importExpenses(input));
-  } catch (error) {
-    sendError(res, error, 'Konnte Ausgaben nicht importieren. Prüfe Personen und Beträge.');
-  }
-});
-
-expensesRouter.post('/', (req, res) => {
-  const input = parseExpenseInput(req.body);
-  if ('error' in input) {
-    res.status(400).json({ error: input.error });
-    return;
-  }
-  try {
-    res.status(201).json(createExpense(input));
-  } catch (error) {
-    sendError(res, error, 'Konnte Ausgabe nicht speichern. Prüfe Personen und Betrag.');
-  }
-});
-
-expensesRouter.patch('/:id', (req, res) => {
-  const id = Number(req.params.id);
-  const input = parseExpenseInput(req.body);
-  if ('error' in input) {
-    res.status(400).json({ error: input.error });
-    return;
-  }
-  try {
-    const expense = updateExpense(id, input);
-    if (!expense) {
-      res.status(404).json({ error: 'Ausgabe nicht gefunden.' });
-      return;
-    }
-    res.json(expense);
-  } catch (error) {
-    sendError(res, error, 'Konnte Ausgabe nicht aktualisieren.');
-  }
-});
-
-expensesRouter.delete('/:id', (req, res) => {
-  try {
-    deleteExpense(Number(req.params.id));
-    res.status(204).end();
-  } catch (error) {
-    sendError(res, error, 'Konnte Ausgabe nicht löschen.');
-  }
-});
-
-expensesRouter.patch('/:id/settled', (req, res) => {
-  const id = Number(req.params.id);
-  const settled = req.body?.settled === true;
-  try {
-    res.json(setExpenseSettled(id, settled));
-  } catch (error) {
-    sendError(res, error, 'Konnte Ausgabe nicht aktualisieren.');
-  }
-});

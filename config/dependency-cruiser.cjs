@@ -101,10 +101,10 @@ module.exports = {
       },
     },
     {
-      name: 'server-routes-not-to-repository',
-      comment: 'HTTP routes call application services, never repositories directly.',
+      name: 'server-controllers-not-to-repository',
+      comment: 'HTTP controllers call application services, never repositories directly.',
       severity: 'error',
-      from: { path: '^src/server/src/modules/[^/]+/routes\\.ts$' },
+      from: { path: '^src/server/src/modules/[^/]+/[^/]*Controller\\.ts$' },
       to: { path: '^src/server/src/modules/[^/]+/repository\\.ts$' },
     },
     {

@@ -4,160 +4,25 @@
  */
 
 export interface paths {
-    "/api/health": {
+    "/settles": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** Liveness check */
-        get: operations["getHealth"];
+        /** @description List all settles. */
+        get: operations["SettlesControllerList"];
         put?: never;
-        post?: never;
+        /** @description Create a settle. */
+        post: operations["SettlesControllerCreate"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/persons": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all persons */
-        get: operations["listPersons"];
-        put?: never;
-        /** Create a person */
-        post: operations["createPerson"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/persons/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Person id */
-                id: components["parameters"]["PersonId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a person and their expenses */
-        delete: operations["deletePerson"];
-        options?: never;
-        head?: never;
-        /** Rename a person */
-        patch: operations["renamePerson"];
-        trace?: never;
-    };
-    "/api/settles": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List all settlements */
-        get: operations["listSettles"];
-        put?: never;
-        /** Create a settlement */
-        post: operations["createSettle"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settles/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Settlement id */
-                id: components["parameters"]["SettleId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a settlement and its expenses */
-        delete: operations["deleteSettle"];
-        options?: never;
-        head?: never;
-        /** Rename a settlement */
-        patch: operations["renameSettle"];
-        trace?: never;
-    };
-    "/api/settles/{id}/close": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Settlement id */
-                id: components["parameters"]["SettleId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Freeze a settlement */
-        post: operations["closeSettle"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settles/{id}/reopen": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Settlement id */
-                id: components["parameters"]["SettleId"];
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reopen a frozen settlement */
-        post: operations["reopenSettle"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/expenses": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List expenses, optionally filtered by settlement */
-        get: operations["listExpenses"];
-        put?: never;
-        /** Create an expense */
-        post: operations["createExpense"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/expenses/import": {
+    "/settles/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -166,43 +31,160 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Import selected bank statement rows as expenses */
-        post: operations["importExpenses"];
+        post?: never;
+        /** @description Delete a settle and its expenses. */
+        delete: operations["SettlesControllerRemove"];
+        options?: never;
+        head?: never;
+        /** @description Rename a settle. */
+        patch: operations["SettlesControllerRename"];
+        trace?: never;
+    };
+    "/settles/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Close a settle. */
+        post: operations["SettlesControllerClose"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/expenses/{id}": {
+    "/settles/{id}/reopen": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @description Expense id */
-                id: components["parameters"]["ExpenseId"];
-            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Reopen a settle. */
+        post: operations["SettlesControllerReopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/settlement/{settleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Compute balances and transfers for a settle. */
+        get: operations["SettlementControllerGet"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/persons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List all persons. */
+        get: operations["PersonsControllerList"];
+        put?: never;
+        /** @description Create a person. */
+        post: operations["PersonsControllerCreate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/persons/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         get?: never;
         put?: never;
         post?: never;
-        /** Delete an expense */
-        delete: operations["deleteExpense"];
+        /** @description Delete a person and their expenses. */
+        delete: operations["PersonsControllerRemove"];
         options?: never;
         head?: never;
-        /** Update an expense */
-        patch: operations["updateExpense"];
+        /** @description Rename a person. */
+        patch: operations["PersonsControllerRename"];
         trace?: never;
     };
-    "/api/expenses/{id}/settled": {
+    "/expenses": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @description Expense id */
-                id: components["parameters"]["ExpenseId"];
-            };
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List expenses, optionally filtered by settle. */
+        get: operations["ExpensesControllerList"];
+        put?: never;
+        /** @description Create an expense. */
+        post: operations["ExpensesControllerCreate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/expenses/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Import multiple expenses from a bank statement. */
+        post: operations["ExpensesControllerImport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/expenses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Delete an expense. */
+        delete: operations["ExpensesControllerRemove"];
+        options?: never;
+        head?: never;
+        /** @description Update an expense. */
+        patch: operations["ExpensesControllerUpdate"];
+        trace?: never;
+    };
+    "/expenses/{id}/settled": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         get?: never;
@@ -211,22 +193,19 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Mark an expense as paid or unpaid */
-        patch: operations["setExpenseSettled"];
+        /** @description Mark an expense as paid or unpaid. */
+        patch: operations["ExpensesControllerSetSettled"];
         trace?: never;
     };
-    "/api/settlement/{settleId}": {
+    "/health": {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @description Settlement id */
-                settleId: components["parameters"]["SettlementSettleId"];
-            };
+            path?: never;
             cookie?: never;
         };
-        /** Compute balances and transfers for a settlement */
-        get: operations["computeSettlement"];
+        /** @description Liveness check. */
+        get: operations["SystemControllerGetHealth"];
         put?: never;
         post?: never;
         delete?: never;
@@ -239,148 +218,129 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        Health: {
-            ok: boolean;
-        };
-        Error: {
-            error: string;
-        };
-        Person: {
-            id: number;
-            name: string;
-        };
-        PersonName: {
-            name: string;
-        };
         Settle: {
+            /** Format: int32 */
             id: number;
             name: string;
-            /** @description SQLite datetime (UTC) */
             createdAt: string;
-            /** @description SQLite datetime (UTC) or null while the settle is open */
             closedAt: string | null;
+            /** Format: int32 */
             expenseCount: number;
+            /** Format: int32 */
             totalCents: number;
         };
-        SettleName: {
+        ErrorResponse: {
+            error: string;
+        };
+        SettleNameInput: {
             name: string;
-        };
-        ExpenseParticipant: {
-            personId: number;
-            weight: number;
-            name: string;
-        };
-        ExpenseParticipantInput: {
-            personId: number;
-            weight: number;
-        };
-        Expense: {
-            id: number;
-            description: string;
-            amountCents: number;
-            paidById: number;
-            paidByName: string;
-            settleId: number;
-            /**
-             * Format: date
-             * @description First day of the expense month
-             */
-            date: string;
-            settled: boolean;
-            /** @description SQLite datetime (UTC) */
-            createdAt: string;
-            participants: components["schemas"]["ExpenseParticipant"][];
-        };
-        ExpenseInput: {
-            description: string;
-            amountCents: number;
-            paidById: number;
-            settleId: number;
-            /** @description Month (YYYY-MM) or date; stored as the first day of the month */
-            date: string;
-            participants: components["schemas"]["ExpenseParticipantInput"][];
-        };
-        ExpenseImportRow: {
-            description: string;
-            amountCents: number;
-            /** @description Month (YYYY-MM) or date; stored as the first day of the month */
-            date: string;
-        };
-        ExpenseImportInput: {
-            settleId: number;
-            paidById: number;
-            participants: components["schemas"]["ExpenseParticipantInput"][];
-            expenses: components["schemas"]["ExpenseImportRow"][];
-        };
-        SettledInput: {
-            settled: boolean;
         };
         SettlementBalance: {
+            /** Format: int32 */
             personId: number;
             name: string;
+            /** Format: int32 */
             paidCents: number;
+            /** Format: int32 */
             owedCents: number;
+            /** Format: int32 */
             balanceCents: number;
         };
         SettlementTransfer: {
+            /** Format: int32 */
             fromPersonId: number;
             fromName: string;
+            /** Format: int32 */
             toPersonId: number;
             toName: string;
+            /** Format: int32 */
             amountCents: number;
+        };
+        ExpenseParticipant: {
+            /** Format: int32 */
+            personId: number;
+            /** Format: int32 */
+            weight: number;
+            name?: string;
+        };
+        Expense: {
+            /** Format: int32 */
+            id: number;
+            description: string;
+            /** Format: int32 */
+            amountCents: number;
+            /** Format: int32 */
+            paidById: number;
+            paidByName?: string;
+            /** Format: int32 */
+            settleId: number;
+            date: string;
+            settled: boolean;
+            createdAt: string;
+            participants: components["schemas"]["ExpenseParticipant"][];
         };
         SettlementResult: {
             balances: components["schemas"]["SettlementBalance"][];
             transfers: components["schemas"]["SettlementTransfer"][];
             settledExpenses: components["schemas"]["Expense"][];
         };
-    };
-    responses: {
-        /** @description Invalid request */
-        BadRequest: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["Error"];
-            };
+        Person: {
+            /** Format: int32 */
+            id: number;
+            name: string;
         };
-        /** @description Resource not found */
-        NotFound: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["Error"];
-            };
+        PersonInput: {
+            name: string;
         };
-        /** @description A resource with the same name already exists */
-        Conflict: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["Error"];
-            };
+        ExpenseParticipantInput: {
+            /** Format: int32 */
+            personId: number;
+            /** Format: int32 */
+            weight: number;
+        };
+        ExpenseImportRow: {
+            description: string;
+            /** Format: int32 */
+            amountCents: number;
+            /** @description Format: YYYY-MM or YYYY-MM-DD. */
+            date: string;
+        };
+        ExpenseImportInput: {
+            /** Format: int32 */
+            settleId: number;
+            /** Format: int32 */
+            paidById: number;
+            participants: components["schemas"]["ExpenseParticipantInput"][];
+            expenses: components["schemas"]["ExpenseImportRow"][];
+        };
+        ExpenseInput: {
+            description: string;
+            /** Format: int32 */
+            amountCents: number;
+            /** Format: int32 */
+            paidById: number;
+            /** Format: int32 */
+            settleId: number;
+            /** @description Format: YYYY-MM or YYYY-MM-DD. */
+            date: string;
+            participants: components["schemas"]["ExpenseParticipantInput"][];
+        };
+        ExpenseSettledInput: {
+            settled: boolean;
+        };
+        Health: {
+            ok: boolean;
         };
     };
-    parameters: {
-        /** @description Person id */
-        PersonId: number;
-        /** @description Settlement id */
-        SettleId: number;
-        /** @description Expense id */
-        ExpenseId: number;
-        /** @description Settlement id */
-        SettlementSettleId: number;
-    };
+    responses: never;
+    parameters: never;
     requestBodies: never;
     headers: never;
     pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    getHealth: {
+    SettlesControllerList: {
         parameters: {
             query?: never;
             header?: never;
@@ -389,124 +349,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Server is running */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Health"];
-                };
-            };
-        };
-    };
-    listPersons: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Persons sorted by name */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Person"][];
-                };
-            };
-        };
-    };
-    createPerson: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PersonName"];
-            };
-        };
-        responses: {
-            /** @description Person created */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Person"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    deletePerson: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Person id */
-                id: components["parameters"]["PersonId"];
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Person deleted */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    renamePerson: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Person id */
-                id: components["parameters"]["PersonId"];
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PersonName"];
-            };
-        };
-        responses: {
-            /** @description Person renamed */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Person"];
-                };
-            };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
-        };
-    };
-    listSettles: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Settlements, newest first */
+            /** @description Ok */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -517,7 +360,7 @@ export interface operations {
             };
         };
     };
-    createSettle: {
+    SettlesControllerCreate: {
         parameters: {
             query?: never;
             header?: never;
@@ -526,11 +369,11 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SettleName"];
+                "application/json": components["schemas"]["SettleNameInput"];
             };
         };
         responses: {
-            /** @description Settlement created */
+            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -539,23 +382,38 @@ export interface operations {
                     "application/json": components["schemas"]["Settle"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            409: components["responses"]["Conflict"];
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Name already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
-    deleteSettle: {
+    SettlesControllerRemove: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Settlement id */
-                id: components["parameters"]["SettleId"];
+                id: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Settlement deleted */
+            /** @description No Content */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -564,23 +422,22 @@ export interface operations {
             };
         };
     };
-    renameSettle: {
+    SettlesControllerRename: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Settlement id */
-                id: components["parameters"]["SettleId"];
+                id: number;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SettleName"];
+                "application/json": components["schemas"]["SettleNameInput"];
             };
         };
         responses: {
-            /** @description Settlement renamed */
+            /** @description Ok */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -589,24 +446,47 @@ export interface operations {
                     "application/json": components["schemas"]["Settle"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
-            409: components["responses"]["Conflict"];
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Settle not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Name already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
-    closeSettle: {
+    SettlesControllerClose: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Settlement id */
-                id: components["parameters"]["SettleId"];
+                id: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Settlement closed */
+            /** @description Ok */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -615,22 +495,29 @@ export interface operations {
                     "application/json": components["schemas"]["Settle"];
                 };
             };
-            404: components["responses"]["NotFound"];
+            /** @description Settle not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
-    reopenSettle: {
+    SettlesControllerReopen: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Settlement id */
-                id: components["parameters"]["SettleId"];
+                id: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Settlement reopened */
+            /** @description Ok */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -639,10 +526,184 @@ export interface operations {
                     "application/json": components["schemas"]["Settle"];
                 };
             };
-            404: components["responses"]["NotFound"];
+            /** @description Settle not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
-    listExpenses: {
+    SettlementControllerGet: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                settleId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ok */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SettlementResult"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PersonsControllerList: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ok */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Person"][];
+                };
+            };
+        };
+    };
+    PersonsControllerCreate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PersonInput"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Person"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Name already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PersonsControllerRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PersonsControllerRename: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PersonInput"];
+            };
+        };
+        responses: {
+            /** @description Ok */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Person"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Person not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Name already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    ExpensesControllerList: {
         parameters: {
             query?: {
                 settleId?: number;
@@ -653,7 +714,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Expenses, newest first */
+            /** @description Ok */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -664,7 +725,7 @@ export interface operations {
             };
         };
     };
-    createExpense: {
+    ExpensesControllerCreate: {
         parameters: {
             query?: never;
             header?: never;
@@ -677,7 +738,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Expense created */
+            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -686,10 +747,18 @@ export interface operations {
                     "application/json": components["schemas"]["Expense"];
                 };
             };
-            400: components["responses"]["BadRequest"];
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
-    importExpenses: {
+    ExpensesControllerImport: {
         parameters: {
             query?: never;
             header?: never;
@@ -702,7 +771,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Imported expenses */
+            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -711,39 +780,52 @@ export interface operations {
                     "application/json": components["schemas"]["Expense"][];
                 };
             };
-            400: components["responses"]["BadRequest"];
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
-    deleteExpense: {
+    ExpensesControllerRemove: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Expense id */
-                id: components["parameters"]["ExpenseId"];
+                id: number;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Expense deleted */
+            /** @description No Content */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
+            /** @description Expense not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
-    updateExpense: {
+    ExpensesControllerUpdate: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Expense id */
-                id: components["parameters"]["ExpenseId"];
+                id: number;
             };
             cookie?: never;
         };
@@ -753,7 +835,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Expense updated */
+            /** @description Ok */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -762,27 +844,42 @@ export interface operations {
                     "application/json": components["schemas"]["Expense"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Expense not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
-    setExpenseSettled: {
+    ExpensesControllerSetSettled: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description Expense id */
-                id: components["parameters"]["ExpenseId"];
+                id: number;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SettledInput"];
+                "application/json": components["schemas"]["ExpenseSettledInput"];
             };
         };
         responses: {
-            /** @description Expense updated */
+            /** @description Ok */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -791,32 +888,35 @@ export interface operations {
                     "application/json": components["schemas"]["Expense"];
                 };
             };
-            400: components["responses"]["BadRequest"];
-            404: components["responses"]["NotFound"];
+            /** @description Expense not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
         };
     };
-    computeSettlement: {
+    SystemControllerGetHealth: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                /** @description Settlement id */
-                settleId: components["parameters"]["SettlementSettleId"];
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Settlement result */
+            /** @description Ok */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SettlementResult"];
+                    "application/json": components["schemas"]["Health"];
                 };
             };
-            400: components["responses"]["BadRequest"];
         };
     };
 }

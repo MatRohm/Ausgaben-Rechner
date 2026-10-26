@@ -1,8 +1,12 @@
 # API contract
 
-`contracts/openapi.yaml` is the source of truth for the REST API shared by the
-Vue client and the Express server. Swagger UI is served at `/api` and loads the
-document from `/api/openapi.yaml`.
+The REST contract is generated from the tsoa controllers in
+`src/server/src/**/*Controller.ts` and their model annotations. Swagger UI is
+served at `/api` and loads the generated document from `/api/openapi.json`.
+
+`npm run tsoa` also generates the Express route wiring in
+`src/server/src/generated/routes.ts`. That file is checked in so the server can
+be built from a clean checkout; regenerate it after changing controllers.
 
 ## Generated client types
 
@@ -23,7 +27,8 @@ committed copy is stale. It runs in `npm run verify` and in CI.
 
 `src/tests/server/contracts.test.ts`:
 
-1. validates `contracts/openapi.yaml` with `@apidevtools/swagger-parser`;
+1. validates the generated `src/server/dist/openapi.json` with
+   `@apidevtools/swagger-parser`;
 2. starts the real Express app against a temporary SQLite database;
 3. exercises every documented endpoint and validates each successful response
    body with Ajv against the dereferenced OpenAPI schema;
@@ -35,7 +40,6 @@ server's implementation and the published contract.
 
 ## Changing the API
 
-1. Update `contracts/openapi.yaml`.
-2. Run `npm run contracts:generate` and commit the generated file.
-3. Update the server and client implementation as needed.
-4. Run `npm run verify`.
+1. Update the controller and model annotations.
+2. Run `npm run contracts:generate` and commit the generated client types.
+3. Run `npm run verify`.

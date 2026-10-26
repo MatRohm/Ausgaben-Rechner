@@ -1,0 +1,46 @@
+{
+  "entryFile": "src/app/app.ts",
+  "noImplicitAdditionalProperties": "silently-remove-extras",
+  "controllerPathGlobs": ["src/**/*Controller.ts"],
+  "spec": {
+    "outputDirectory": "dist",
+    "specFileBaseName": "openapi",
+    "specVersion": 3,
+    "name": "Ausgaben-Rechner API",
+    "description": "REST API for managing shared expenses and settlements.",
+    "version": "1.0.0",
+    "basePath": "/api",
+    "operationIdTemplate": "{{controllerName}}{{titleCase method.name}}",
+    "tags": [
+      {
+        "name": "system",
+        "description": "Health and operational endpoints"
+      },
+      {
+        "name": "persons",
+        "description": "People who pay for and share expenses"
+      },
+      {
+        "name": "settles",
+        "description": "Settlements (Abrechnungen) and their lifecycle"
+      },
+      {
+        "name": "expenses",
+        "description": "Expenses, payers, participants, and paid state"
+      },
+      {
+        "name": "settlement",
+        "description": "Balance and transfer calculation"
+      }
+    ],
+    "yaml": false
+  },
+  "routes": {
+    "routesDir": "src/generated",
+    "routesFileName": "routes.ts",
+    "middleware": "express",
+    "esm": true,
+    "basePath": "/api",
+    "noWriteIfUnchanged": true
+  }
+}

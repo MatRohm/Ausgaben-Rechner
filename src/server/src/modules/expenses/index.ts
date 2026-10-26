@@ -4,6 +4,8 @@ export type {
   ExpenseImportRow,
   ExpenseInput,
   ExpenseParticipant,
+  ExpenseParticipantInput,
+  ExpenseSettledInput,
 } from './types.js';
 export {
   createExpense,
@@ -14,4 +16,3 @@ export {
   setExpenseSettled,
   updateExpense,
 } from './service.js';
-export { expensesRouter } from './routes.js';

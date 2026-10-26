@@ -10,7 +10,7 @@ const HEADER = `/**
 
 `;
 
-const specUrl = new URL('./openapi.yaml', import.meta.url);
+const specUrl = new URL('../src/server/dist/openapi.json', import.meta.url);
 const typesUrl = new URL('../src/client/src/shared/api-types.ts', import.meta.url);
 
 const ast = await openapiTS(specUrl);

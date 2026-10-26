@@ -1,4 +1,5 @@
 import type { ValidateFunction } from 'ajv';
+import path from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { requestJson, startTestServer, type TestServer } from './helpers';
 
@@ -106,7 +107,9 @@ beforeAll(async () => {
   addFormats(ajv);
   compile = (schema) => ajv.compile(schema);
 
-  document = (await SwaggerParser.validate('contracts/openapi.yaml')) as unknown as OpenApiDocument;
+  document = (await SwaggerParser.validate(
+    path.resolve(process.cwd(), 'src/server/dist/openapi.json'),
+  )) as unknown as OpenApiDocument;
 });
 
 afterAll(async () => {
@@ -115,33 +118,33 @@ afterAll(async () => {
 
 describe('OpenAPI contract', () => {
   it('validates every successful response against the published schemas', async () => {
-    await call<{ ok: boolean }>('/api/health', 'get', '/api/health');
+    await call<{ ok: boolean }>('/health', 'get', '/api/health');
 
-    const alice = await call<Person>('/api/persons', 'post', '/api/persons', {
+    const alice = await call<Person>('/persons', 'post', '/api/persons', {
       method: 'POST',
       body: JSON.stringify({ name: 'Alice' }),
     });
-    const bob = await call<Person>('/api/persons', 'post', '/api/persons', {
+    const bob = await call<Person>('/persons', 'post', '/api/persons', {
       method: 'POST',
       body: JSON.stringify({ name: 'Bob' }),
     });
-    await call<Person[]>('/api/persons', 'get', '/api/persons');
-    await call<Person>('/api/persons/{id}', 'patch', `/api/persons/${bob.id}`, {
+    await call<Person[]>('/persons', 'get', '/api/persons');
+    await call<Person>('/persons/{id}', 'patch', `/api/persons/${bob.id}`, {
       method: 'PATCH',
       body: JSON.stringify({ name: 'Robert' }),
     });
 
-    const settle = await call<Settle>('/api/settles', 'post', '/api/settles', {
+    const settle = await call<Settle>('/settles', 'post', '/api/settles', {
       method: 'POST',
       body: JSON.stringify({ name: 'Contract trip' }),
     });
-    await call<Settle[]>('/api/settles', 'get', '/api/settles');
-    await call<Settle>('/api/settles/{id}', 'patch', `/api/settles/${settle.id}`, {
+    await call<Settle[]>('/settles', 'get', '/api/settles');
+    await call<Settle>('/settles/{id}', 'patch', `/api/settles/${settle.id}`, {
       method: 'PATCH',
       body: JSON.stringify({ name: 'Contract trip 2025' }),
     });
 
-    const expense = await call<Expense>('/api/expenses', 'post', '/api/expenses', {
+    const expense = await call<Expense>('/expenses', 'post', '/api/expenses', {
       method: 'POST',
       body: JSON.stringify({
         description: 'Dinner',
@@ -155,8 +158,8 @@ describe('OpenAPI contract', () => {
         ],
       }),
     });
-    await call<Expense[]>('/api/expenses', 'get', `/api/expenses?settleId=${settle.id}`);
-    const imported = await call<Expense[]>('/api/expenses/import', 'post', '/api/expenses/import', {
+    await call<Expense[]>('/expenses', 'get', `/api/expenses?settleId=${settle.id}`);
+    const imported = await call<Expense[]>('/expenses/import', 'post', '/api/expenses/import', {
       method: 'POST',
       body: JSON.stringify({
         settleId: settle.id,
@@ -175,7 +178,7 @@ describe('OpenAPI contract', () => {
       }),
     });
     expect(imported).toHaveLength(1);
-    await call<Expense>('/api/expenses/{id}', 'patch', `/api/expenses/${expense.id}`, {
+    await call<Expense>('/expenses/{id}', 'patch', `/api/expenses/${expense.id}`, {
       method: 'PATCH',
       body: JSON.stringify({
         description: 'Dinner and drinks',
@@ -189,31 +192,26 @@ describe('OpenAPI contract', () => {
         ],
       }),
     });
-    await call<Expense>(
-      '/api/expenses/{id}/settled',
-      'patch',
-      `/api/expenses/${expense.id}/settled`,
-      {
-        method: 'PATCH',
-        body: JSON.stringify({ settled: true }),
-      },
-    );
-    await call<unknown>('/api/settlement/{settleId}', 'get', `/api/settlement/${settle.id}`);
+    await call<Expense>('/expenses/{id}/settled', 'patch', `/api/expenses/${expense.id}/settled`, {
+      method: 'PATCH',
+      body: JSON.stringify({ settled: true }),
+    });
+    await call<unknown>('/settlement/{settleId}', 'get', `/api/settlement/${settle.id}`);
 
-    await call<Settle>('/api/settles/{id}/close', 'post', `/api/settles/${settle.id}/close`, {
+    await call<Settle>('/settles/{id}/close', 'post', `/api/settles/${settle.id}/close`, {
       method: 'POST',
     });
-    await call<Settle>('/api/settles/{id}/reopen', 'post', `/api/settles/${settle.id}/reopen`, {
+    await call<Settle>('/settles/{id}/reopen', 'post', `/api/settles/${settle.id}/reopen`, {
       method: 'POST',
     });
 
-    await call<void>('/api/expenses/{id}', 'delete', `/api/expenses/${expense.id}`, {
+    await call<void>('/expenses/{id}', 'delete', `/api/expenses/${expense.id}`, {
       method: 'DELETE',
     });
-    await call<void>('/api/persons/{id}', 'delete', `/api/persons/${bob.id}`, {
+    await call<void>('/persons/{id}', 'delete', `/api/persons/${bob.id}`, {
       method: 'DELETE',
     });
-    await call<void>('/api/settles/{id}', 'delete', `/api/settles/${settle.id}`, {
+    await call<void>('/settles/{id}', 'delete', `/api/settles/${settle.id}`, {
       method: 'DELETE',
     });
   });
@@ -225,7 +223,7 @@ describe('OpenAPI contract', () => {
     });
 
     expect(response.status).toBe(409);
-    const validate = validatorFor('/api/persons', 'post', response.status);
+    const validate = validatorFor('/persons', 'post', response.status);
     expect(validate).toBeDefined();
     if (validate) {
       const valid = validate(response.body);

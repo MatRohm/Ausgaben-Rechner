@@ -1,4 +1,5 @@
 import express, { type Express } from 'express';
+import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,7 +10,15 @@ const require = createRequire(import.meta.url);
 // Resolve the package root so the bundled Swagger UI assets can be served
 // without an external CDN.
 const swaggerUiDir = path.dirname(require.resolve('swagger-ui-dist'));
-const openApiSpecPath = path.resolve(__dirname, '../../../../contracts/openapi.yaml');
+
+// tsoa writes the generated document to the server's dist directory. Resolve
+// both layouts so the same code works from source (tsx/vitest) and dist.
+const openApiSpecCandidates = [
+  path.resolve(__dirname, '../openapi.json'),
+  path.resolve(__dirname, '../../dist/openapi.json'),
+];
+const openApiSpecPath =
+  openApiSpecCandidates.find((candidate) => fs.existsSync(candidate)) ?? openApiSpecCandidates[1];
 
 const docsPage = `<!doctype html>
 <html lang="en">
@@ -39,7 +48,7 @@ const docsPage = `<!doctype html>
     <script src="/api/swagger-ui/swagger-ui-bundle.js"></script>
     <script>
       window.ui = SwaggerUIBundle({
-        url: '/api/openapi.yaml',
+        url: '/api/openapi.json',
         dom_id: '#swagger-ui',
         deepLinking: true,
         presets: [SwaggerUIBundle.presets.apis],
@@ -50,12 +59,12 @@ const docsPage = `<!doctype html>
 `;
 
 /**
- * Serve the OpenAPI document and Swagger UI at the API root.
+ * Serve the generated OpenAPI document and Swagger UI at the API root.
  */
 export function registerApiDocs(app: Express): void {
   app.use('/api/swagger-ui', express.static(swaggerUiDir, { index: false }));
 
-  app.get('/api/openapi.yaml', (_req, res) => {
+  app.get('/api/openapi.json', (_req, res) => {
     res.sendFile(openApiSpecPath);
   });
 

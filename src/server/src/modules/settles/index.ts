@@ -1,4 +1,4 @@
-export type { Settle } from './types.js';
+export type { Settle, SettleNameInput } from './types.js';
 export {
   closeSettle,
   createSettle,
@@ -8,4 +8,3 @@ export {
   renameSettle,
   reopenSettle,
 } from './service.js';
-export { settlesRouter } from './routes.js';
