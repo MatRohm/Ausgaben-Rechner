@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import type { Person } from '@/modules/persons';
 import { formatCentsForInput, formatMoney, formatMonth, parseEuroToCents } from '@/shared/format';
 import { expensesApi } from './api';
+import ExpenseIcon from './ExpenseIcon.vue';
 import { parseStatementJson, type StatementCandidate } from './importStatement';
 import type { Expense, ExpenseImportRow } from './types';
 
@@ -282,15 +283,18 @@ async function submit(): Promise<void> {
             />
             <div class="import-main">
               <div class="import-top">
-                <input
-                  v-if="candidate.importable"
-                  v-model="candidate.description"
-                  class="import-description-input"
-                  type="text"
-                  aria-label="Name der Ausgabe"
-                  @input="refreshCandidate(candidate)"
-                />
-                <span v-else class="import-desc">{{ candidate.description }}</span>
+                <div class="import-description">
+                  <ExpenseIcon :description="candidate.description" />
+                  <input
+                    v-if="candidate.importable"
+                    v-model="candidate.description"
+                    class="import-description-input"
+                    type="text"
+                    aria-label="Name der Ausgabe"
+                    @input="refreshCandidate(candidate)"
+                  />
+                  <span v-else class="import-desc">{{ candidate.description }}</span>
+                </div>
                 <input
                   v-if="candidate.importable"
                   v-model="candidate.amountInput"

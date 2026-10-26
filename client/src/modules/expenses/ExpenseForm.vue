@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import type { Person } from '@/modules/persons';
 import { currentMonthISO, formatCentsForInput, parseEuroToCents } from '@/shared/format';
+import ExpenseIcon from './ExpenseIcon.vue';
 import type { Expense, ExpenseDraft } from './types';
 
 const props = defineProps<{
@@ -127,7 +128,10 @@ function submitNew() {
 <template>
   <form class="expense-form" @submit.prevent="submit">
     <div class="modal-heading">
-      <h2 class="form-title">{{ expense ? 'Ausgabe bearbeiten' : 'Neue Ausgabe' }}</h2>
+      <h2 class="form-title">
+        <ExpenseIcon :description="description" />
+        <span>{{ expense ? 'Ausgabe bearbeiten' : 'Neue Ausgabe' }}</span>
+      </h2>
       <button
         type="button"
         class="icon-btn modal-close"

@@ -5,6 +5,7 @@ import { personsApi } from '@/modules/persons';
 import { SettleSelect, useSettles } from '@/modules/settles';
 import { formatMonth, formatMoney } from '@/shared/format';
 import { expensesApi } from './api';
+import ExpenseIcon from './ExpenseIcon.vue';
 import ImportExpensesDialog from './ImportExpensesDialog.vue';
 import type { Expense, ExpenseDraft } from './types';
 import ExpenseForm from './ExpenseForm.vue';
@@ -184,7 +185,10 @@ async function handleImported() {
       <li v-for="e in expenses" :key="e.id" class="expense-card" :class="{ settled: e.settled }">
         <div class="expense-main">
           <div class="expense-top">
-            <span class="expense-desc">{{ e.description }}</span>
+            <span class="expense-desc">
+              <ExpenseIcon :description="e.description" />
+              {{ e.description }}
+            </span>
             <span class="expense-amount">{{ formatMoney(e.amountCents) }}</span>
           </div>
           <div class="expense-meta">
