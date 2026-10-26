@@ -7,7 +7,10 @@ import type { SettlementResult } from './types.js';
 @Route('settlement')
 @Tags('settlement')
 export class SettlementController extends Controller {
-  /** Compute balances and transfers for a settle. */
+  /**
+   * Compute balances and transfers for a settle.
+   * @summary Compute balances and transfers for a settle.
+   */
   @Get('{settleId}')
   @Response<ErrorResponse>(400, 'Bad Request')
   public async get(@Path() settleId: number): Promise<SettlementResult> {

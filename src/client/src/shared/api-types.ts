@@ -11,10 +11,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description List all settles. */
+        /**
+         * List all settles.
+         * @description List all settles.
+         */
         get: operations["SettlesControllerList"];
         put?: never;
-        /** @description Create a settle. */
+        /**
+         * Create a settle.
+         * @description Create a settle.
+         */
         post: operations["SettlesControllerCreate"];
         delete?: never;
         options?: never;
@@ -32,11 +38,17 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** @description Delete a settle and its expenses. */
+        /**
+         * Delete a settle and its expenses.
+         * @description Delete a settle and its expenses.
+         */
         delete: operations["SettlesControllerRemove"];
         options?: never;
         head?: never;
-        /** @description Rename a settle. */
+        /**
+         * Rename a settle.
+         * @description Rename a settle.
+         */
         patch: operations["SettlesControllerRename"];
         trace?: never;
     };
@@ -49,7 +61,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Close a settle. */
+        /**
+         * Close a settle.
+         * @description Close a settle.
+         */
         post: operations["SettlesControllerClose"];
         delete?: never;
         options?: never;
@@ -66,7 +81,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Reopen a settle. */
+        /**
+         * Reopen a settle.
+         * @description Reopen a settle.
+         */
         post: operations["SettlesControllerReopen"];
         delete?: never;
         options?: never;
@@ -81,7 +99,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Compute balances and transfers for a settle. */
+        /**
+         * Compute balances and transfers for a settle.
+         * @description Compute balances and transfers for a settle.
+         */
         get: operations["SettlementControllerGet"];
         put?: never;
         post?: never;
@@ -98,10 +119,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description List all persons. */
+        /**
+         * List all persons.
+         * @description List all persons.
+         */
         get: operations["PersonsControllerList"];
         put?: never;
-        /** @description Create a person. */
+        /**
+         * Create a person.
+         * @description Create a person.
+         */
         post: operations["PersonsControllerCreate"];
         delete?: never;
         options?: never;
@@ -119,11 +146,17 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** @description Delete a person and their expenses. */
+        /**
+         * Delete a person and their expenses.
+         * @description Delete a person and their expenses.
+         */
         delete: operations["PersonsControllerRemove"];
         options?: never;
         head?: never;
-        /** @description Rename a person. */
+        /**
+         * Rename a person.
+         * @description Rename a person.
+         */
         patch: operations["PersonsControllerRename"];
         trace?: never;
     };
@@ -134,10 +167,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description List expenses, optionally filtered by settle. */
+        /**
+         * List expenses, optionally filtered by settle.
+         * @description List expenses, optionally filtered by settle.
+         */
         get: operations["ExpensesControllerList"];
         put?: never;
-        /** @description Create an expense. */
+        /**
+         * Create an expense.
+         * @description Create an expense.
+         */
         post: operations["ExpensesControllerCreate"];
         delete?: never;
         options?: never;
@@ -154,7 +193,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Import multiple expenses from a bank statement. */
+        /**
+         * Import multiple expenses from a bank statement.
+         * @description Import multiple expenses from a bank statement.
+         */
         post: operations["ExpensesControllerImport"];
         delete?: never;
         options?: never;
@@ -172,11 +214,17 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** @description Delete an expense. */
+        /**
+         * Delete an expense.
+         * @description Delete an expense.
+         */
         delete: operations["ExpensesControllerRemove"];
         options?: never;
         head?: never;
-        /** @description Update an expense. */
+        /**
+         * Update an expense.
+         * @description Update an expense.
+         */
         patch: operations["ExpensesControllerUpdate"];
         trace?: never;
     };
@@ -193,7 +241,10 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** @description Mark an expense as paid or unpaid. */
+        /**
+         * Mark an expense as paid or unpaid.
+         * @description Mark an expense as paid or unpaid.
+         */
         patch: operations["ExpensesControllerSetSettled"];
         trace?: never;
     };
@@ -204,7 +255,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Liveness check. */
+        /**
+         * Liveness check.
+         * @description Liveness check.
+         */
         get: operations["SystemControllerGetHealth"];
         put?: never;
         post?: never;

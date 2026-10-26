@@ -19,13 +19,19 @@ import type { Person, PersonInput } from './types.js';
 @Route('persons')
 @Tags('persons')
 export class PersonsController extends Controller {
-  /** List all persons. */
+  /**
+   * List all persons.
+   * @summary List all persons.
+   */
   @Get()
   public async list(): Promise<Person[]> {
     return listPersons();
   }
 
-  /** Create a person. */
+  /**
+   * Create a person.
+   * @summary Create a person.
+   */
   @Post()
   @SuccessResponse('201', 'Created')
   @Response<ErrorResponse>(400, 'Bad Request')
@@ -43,7 +49,10 @@ export class PersonsController extends Controller {
     }
   }
 
-  /** Rename a person. */
+  /**
+   * Rename a person.
+   * @summary Rename a person.
+   */
   @Patch('{id}')
   @Response<ErrorResponse>(400, 'Bad Request')
   @Response<ErrorResponse>(404, 'Person not found')
@@ -62,7 +71,10 @@ export class PersonsController extends Controller {
     }
   }
 
-  /** Delete a person and their expenses. */
+  /**
+   * Delete a person and their expenses.
+   * @summary Delete a person and their expenses.
+   */
   @Delete('{id}')
   @SuccessResponse('204', 'No Content')
   public async remove(@Path() id: number): Promise<void> {

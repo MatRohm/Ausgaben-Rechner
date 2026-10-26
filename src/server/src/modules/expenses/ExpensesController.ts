@@ -28,13 +28,19 @@ import { parseExpenseInput, parseImportInput } from './validation.js';
 @Route('expenses')
 @Tags('expenses')
 export class ExpensesController extends Controller {
-  /** List expenses, optionally filtered by settle. */
+  /**
+   * List expenses, optionally filtered by settle.
+   * @summary List expenses, optionally filtered by settle.
+   */
   @Get()
   public async list(@Query() settleId?: number): Promise<Expense[]> {
     return listExpenses(settleId);
   }
 
-  /** Import multiple expenses from a bank statement. */
+  /**
+   * Import multiple expenses from a bank statement.
+   * @summary Import multiple expenses from a bank statement.
+   */
   @Post('import')
   @SuccessResponse('201', 'Created')
   @Response<ErrorResponse>(400, 'Bad Request')
@@ -52,7 +58,10 @@ export class ExpensesController extends Controller {
     }
   }
 
-  /** Create an expense. */
+  /**
+   * Create an expense.
+   * @summary Create an expense.
+   */
   @Post()
   @SuccessResponse('201', 'Created')
   @Response<ErrorResponse>(400, 'Bad Request')
@@ -70,7 +79,10 @@ export class ExpensesController extends Controller {
     }
   }
 
-  /** Update an expense. */
+  /**
+   * Update an expense.
+   * @summary Update an expense.
+   */
   @Patch('{id}')
   @Response<ErrorResponse>(400, 'Bad Request')
   @Response<ErrorResponse>(404, 'Expense not found')
@@ -88,7 +100,10 @@ export class ExpensesController extends Controller {
     }
   }
 
-  /** Delete an expense. */
+  /**
+   * Delete an expense.
+   * @summary Delete an expense.
+   */
   @Delete('{id}')
   @SuccessResponse('204', 'No Content')
   @Response<ErrorResponse>(404, 'Expense not found')
@@ -102,7 +117,10 @@ export class ExpensesController extends Controller {
     }
   }
 
-  /** Mark an expense as paid or unpaid. */
+  /**
+   * Mark an expense as paid or unpaid.
+   * @summary Mark an expense as paid or unpaid.
+   */
   @Patch('{id}/settled')
   @Response<ErrorResponse>(404, 'Expense not found')
   public async setSettled(

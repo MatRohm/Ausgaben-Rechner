@@ -4,7 +4,10 @@ import type { Health } from '../shared/models.js';
 @Route('health')
 @Tags('system')
 export class SystemController extends Controller {
-  /** Liveness check. */
+  /**
+   * Liveness check.
+   * @summary Liveness check.
+   */
   @Get()
   public async getHealth(): Promise<Health> {
     return { ok: true };
