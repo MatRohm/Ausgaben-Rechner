@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import type { Person } from '@/modules/persons';
 import { formatCentsForInput, formatMoney, formatMonth, parseEuroToCents } from '@/shared/format';
 import { expensesApi } from './api';
@@ -122,20 +122,28 @@ function toggleCandidate(id: number): void {
   selected.value[id] = !selected.value[id];
 }
 
-type EditableField = 'description' | 'amount';
+type RowField = 'checkbox' | 'description' | 'amount';
 
-function editableInput(row: Element, field: EditableField): HTMLInputElement | null {
-  const selector = field === 'description' ? '.import-description-input' : '.import-amount-input';
-  return row.querySelector<HTMLInputElement>(selector);
+const ROW_FIELDS: RowField[] = ['checkbox', 'description', 'amount'];
+
+const FIELD_SELECTORS: Record<RowField, string> = {
+  checkbox: 'input[type="checkbox"]',
+  description: '.import-description-input',
+  amount: '.import-amount-input',
+};
+
+function fieldInput(row: Element, field: RowField): HTMLInputElement | null {
+  const input = row.querySelector<HTMLInputElement>(FIELD_SELECTORS[field]);
+  return input && !input.disabled ? input : null;
 }
 
-function focusAndSelect(input: HTMLInputElement | null): void {
+function focusField(input: HTMLInputElement | null): void {
   if (!input) return;
   input.focus();
-  input.select();
+  if (input.type === 'text') input.select();
 }
 
-function handleRowKeydown(event: KeyboardEvent, field: EditableField): void {
+function handleRowKeydown(event: KeyboardEvent, field: RowField): void {
   if (!event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
 
   const input = event.currentTarget as HTMLInputElement;
@@ -144,7 +152,15 @@ function handleRowKeydown(event: KeyboardEvent, field: EditableField): void {
 
   if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
     event.preventDefault();
-    focusAndSelect(editableInput(row, event.key === 'ArrowLeft' ? 'description' : 'amount'));
+    const step = event.key === 'ArrowRight' ? 1 : -1;
+    const start = ROW_FIELDS.indexOf(field);
+    for (let i = start + step; i >= 0 && i < ROW_FIELDS.length; i += step) {
+      const target = fieldInput(row, ROW_FIELDS[i]);
+      if (target) {
+        focusField(target);
+        return;
+      }
+    }
     return;
   }
 
@@ -159,13 +175,22 @@ function handleRowKeydown(event: KeyboardEvent, field: EditableField): void {
 
   const step = event.key === 'ArrowDown' ? 1 : -1;
   for (let i = index + step; i >= 0 && i < rows.length; i += step) {
-    const target = editableInput(rows[i], field);
+    const target = fieldInput(rows[i], field);
     if (target) {
-      focusAndSelect(target);
+      focusField(target);
       return;
     }
   }
 }
+
+// Keep Alt+Left/Right from triggering browser back/forward while the dialog is open.
+function blockHistoryNavigation(event: KeyboardEvent): void {
+  if (!event.altKey || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return;
+  event.preventDefault();
+}
+
+onMounted(() => window.addEventListener('keydown', blockHistoryNavigation, true));
+onUnmounted(() => window.removeEventListener('keydown', blockHistoryNavigation, true));
 
 async function handleFile(event: Event): Promise<void> {
   const input = event.target as HTMLInputElement;
@@ -325,6 +350,7 @@ async function submit(): Promise<void> {
               :checked="!!selected[candidate.id]"
               :disabled="!candidate.importable"
               @change="toggleCandidate(candidate.id)"
+              @keydown="handleRowKeydown($event, 'checkbox')"
             />
             <div class="import-main">
               <div class="import-top">

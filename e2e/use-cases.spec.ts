@@ -247,29 +247,50 @@ test('statement import navigates rows and fields with alt+arrow keys', async ({
   await dialog.getByLabel('Kontoauszug (JSON)').setInputFiles(statementFile);
 
   const rows = dialog.locator('.import-row');
+  const firstCheckbox = rows.nth(0).locator('input[type="checkbox"]');
   const firstDescription = rows.nth(0).getByLabel('Name der Ausgabe');
   const firstAmount = rows.nth(0).getByLabel('Betrag');
+  const secondCheckbox = rows.nth(1).locator('input[type="checkbox"]');
   const secondDescription = rows.nth(1).getByLabel('Name der Ausgabe');
   const secondAmount = rows.nth(1).getByLabel('Betrag');
 
-  await firstDescription.focus();
+  await firstCheckbox.focus();
   await page.keyboard.press('Alt+ArrowRight');
+  await expectFocusedAndSelected(firstDescription);
+
+  await page.keyboard.press('Alt+ArrowRight');
+  await expectFocusedAndSelected(firstAmount);
+
+  await page.keyboard.press('Alt+ArrowLeft');
+  await expectFocusedAndSelected(firstDescription);
+
+  await page.keyboard.press('Alt+ArrowLeft');
+  await expect(firstCheckbox).toBeFocused();
+
+  await page.keyboard.press('Alt+ArrowDown');
+  await expect(secondCheckbox).toBeFocused();
+
+  await page.keyboard.press('Alt+ArrowRight');
+  await expectFocusedAndSelected(secondDescription);
+
+  await page.keyboard.press('Alt+ArrowRight');
+  await expectFocusedAndSelected(secondAmount);
+
+  await page.keyboard.press('Alt+ArrowUp');
   await expectFocusedAndSelected(firstAmount);
 
   await page.keyboard.press('Alt+ArrowDown');
   await expectFocusedAndSelected(secondAmount);
 
-  await page.keyboard.press('Alt+ArrowLeft');
-  await expectFocusedAndSelected(secondDescription);
-
-  await page.keyboard.press('Alt+ArrowUp');
-  await expectFocusedAndSelected(firstDescription);
-
-  await page.keyboard.press('Alt+ArrowDown');
-  await expectFocusedAndSelected(secondDescription);
-
   // Row 3 is not importable, so Alt+ArrowDown keeps focus on row 2.
   await page.keyboard.press('Alt+ArrowDown');
-  await expectFocusedAndSelected(secondDescription);
+  await expectFocusedAndSelected(secondAmount);
+
+  // Alt+Left/Right must not navigate browser history while the dialog is open.
+  const urlBefore = page.url();
+  await dialog.getByRole('button', { name: 'Abbrechen' }).focus();
+  await page.keyboard.press('Alt+ArrowLeft');
+  await page.keyboard.press('Alt+ArrowRight');
   await expect(dialog).toBeVisible();
+  await expect(page).toHaveURL(urlBefore);
 });
