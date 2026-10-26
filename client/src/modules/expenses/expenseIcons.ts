@@ -14,6 +14,16 @@ const RULES: ExpenseIconRule[] = [
     icon: '🛒',
     label: 'Supermarkt',
   },
+  {
+    pattern: /amazon|amzn/i,
+    icon: '📦',
+    label: 'Shopping',
+  },
+  {
+    pattern: /h\s*&\s*m|c\s*&\s*a|primark/i,
+    icon: '👕',
+    label: 'Kleidung',
+  },
 ];
 
 export function findExpenseIcon(description: string): ExpenseIcon | null {

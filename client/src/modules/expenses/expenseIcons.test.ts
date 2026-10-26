@@ -10,6 +10,20 @@ describe('findExpenseIcon', () => {
     expect(findExpenseIcon('ALDI')).toEqual({ icon: '🛒', label: 'Supermarkt' });
   });
 
+  it('matches shopping and clothing descriptions', () => {
+    expect(findExpenseIcon('Amazon')).toEqual({ icon: '📦', label: 'Shopping' });
+    expect(findExpenseIcon('304-2409157-9312326 AMZN Mktp DE')).toEqual({
+      icon: '📦',
+      label: 'Shopping',
+    });
+    expect(findExpenseIcon('H&M')).toEqual({ icon: '👕', label: 'Kleidung' });
+    expect(findExpenseIcon('H & M')).toEqual({ icon: '👕', label: 'Kleidung' });
+    expect(findExpenseIcon('Primark - Kleidung')).toEqual({
+      icon: '👕',
+      label: 'Kleidung',
+    });
+  });
+
   it('returns null for unmatched or empty descriptions', () => {
     expect(findExpenseIcon('Miete')).toBeNull();
     expect(findExpenseIcon('Sparkasse')).toBeNull();
