@@ -88,6 +88,59 @@ describe('REST API', () => {
     expect(afterSettled.balances.every((balance) => balance.balanceCents === 0)).toBe(true);
   });
 
+  it('accepts zero participant weights and rejects an all-zero split', async () => {
+    const alice = await api<Person>(server.baseUrl, '/api/persons', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Zero-Alice' }),
+    });
+    const bob = await api<Person>(server.baseUrl, '/api/persons', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Zero-Bob' }),
+    });
+    const settle = await api<Settle>(server.baseUrl, '/api/settles', {
+      method: 'POST',
+      body: JSON.stringify({ name: 'Zero split' }),
+    });
+
+    const payload = {
+      description: 'Zero weight',
+      amountCents: 1000,
+      paidById: alice.id,
+      settleId: settle.id,
+      date: '2026-07-01',
+      participants: [
+        { personId: alice.id, weight: 1 },
+        { personId: bob.id, weight: 0 },
+      ],
+    };
+    const created = await api<{ participants: { personId: number; weight: number }[] }>(
+      server.baseUrl,
+      '/api/expenses',
+      { method: 'POST', body: JSON.stringify(payload) },
+    );
+    expect(created.participants).toMatchObject([
+      { personId: alice.id, weight: 1 },
+      { personId: bob.id, weight: 0 },
+    ]);
+
+    const result = await api<SettlementResult>(server.baseUrl, `/api/settlement/${settle.id}`);
+    expect(result.balances.find((b) => b.personId === bob.id)?.balanceCents).toBe(0);
+    expect(result.balances.find((b) => b.personId === alice.id)?.balanceCents).toBe(0);
+
+    const rejected = await requestJson(server.baseUrl, '/api/expenses', {
+      method: 'POST',
+      body: JSON.stringify({
+        ...payload,
+        participants: [
+          { personId: alice.id, weight: 0 },
+          { personId: bob.id, weight: 0 },
+        ],
+      }),
+    });
+    expect(rejected.status).toBe(400);
+    expect(rejected.body).toMatchObject({ error: expect.stringMatching(/größer als 0/) });
+  });
+
   it('imports selected bank rows in one request', async () => {
     const alice = await api<Person>(server.baseUrl, '/api/persons', {
       method: 'POST',

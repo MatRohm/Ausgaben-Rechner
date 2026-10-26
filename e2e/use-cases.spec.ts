@@ -151,6 +151,46 @@ test('expenses can be created with a split, edited, marked paid, and deleted', a
   await expect(page.locator('.expense-card').filter({ hasText: 'Dinner edited' })).toHaveCount(0);
 });
 
+test('expense participants can have a zero weight', async ({ page, request, app }) => {
+  const suffix = uniqueSuffix();
+  const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);
+  const bob = await createPerson(request, app.baseUrl, `Bob ${suffix}`);
+  const settle = await createSettle(request, app.baseUrl, `Zero weight ${suffix}`);
+
+  await page.goto(app.baseUrl);
+  await selectSettle(page, settle.name);
+  await page.getByRole('button', { name: '+ Neue Ausgabe' }).click();
+
+  const form = page.locator('.expense-form');
+  await form.getByLabel('Beschreibung').fill('Hotel');
+  await form.getByLabel('Betrag (€)').fill('20,00');
+  await form.getByLabel('Bezahlt von').selectOption({ label: alice.name });
+  await form.getByLabel('Monat').fill('2026-07');
+
+  const otherParticipants = form
+    .locator('.participant-row')
+    .filter({ hasNotText: alice.name })
+    .filter({ hasNotText: bob.name });
+  for (const row of await otherParticipants.all()) {
+    const checkbox = row.getByRole('checkbox');
+    if (await checkbox.isChecked()) await checkbox.uncheck();
+  }
+
+  const bobRow = form.locator('.participant-row').filter({ hasText: bob.name });
+  await bobRow.locator('.weight-input').fill('0');
+  await form.getByRole('button', { name: 'Speichern', exact: true }).click();
+
+  await expect(page.locator('.expense-card').filter({ hasText: 'Hotel' })).toBeVisible();
+
+  await page.goto(`${app.baseUrl}/ausgleich`);
+  await selectSettle(page, settle.name);
+
+  const aliceBalance = page.locator('.balance-row').filter({ hasText: alice.name });
+  const bobBalance = page.locator('.balance-row').filter({ hasText: bob.name });
+  await expect(aliceBalance).toContainText('Anteil 20,00');
+  await expect(bobBalance).toContainText('Anteil 0,00');
+});
+
 test('settlement shows balances and the minimal transfer', async ({ page, request, app }) => {
   const suffix = uniqueSuffix();
   const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);

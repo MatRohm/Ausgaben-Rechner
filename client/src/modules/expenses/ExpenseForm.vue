@@ -106,16 +106,27 @@ function buildPayload(): ExpenseDraft | null {
     formError.value = 'Bitte mindestens eine Person auswählen.';
     return null;
   }
+
+  const participants = selected.value.map((id) => ({
+    personId: id,
+    weight: Number(weights.value[id]),
+  }));
+  if (participants.some(({ weight }) => !Number.isInteger(weight) || weight < 0)) {
+    formError.value = 'Gewichte müssen ganze Zahlen ab 0 sein.';
+    return null;
+  }
+  if (!participants.some(({ weight }) => weight > 0)) {
+    formError.value = 'Mindestens eine Person muss ein Gewicht größer als 0 haben.';
+    return null;
+  }
+
   formError.value = '';
   return {
     description: description.value.trim(),
     amountCents: amountCents.value,
     paidById: paidById.value,
     date: `${date.value}-01`,
-    participants: selected.value.map((id) => ({
-      personId: id,
-      weight: weights.value[id] ?? 1,
-    })),
+    participants,
   };
 }
 
@@ -189,13 +200,15 @@ function submitNew() {
             v-model.number="weights[p.id]"
             class="weight-input"
             type="number"
-            min="1"
+            min="0"
             step="1"
             title="Anteil (Gewicht)"
           />
         </div>
       </div>
-      <p class="hint">Gewicht: höhere Zahl = größerer Anteil (Standard: 1 für alle).</p>
+      <p class="hint">
+        Gewicht: höhere Zahl = größerer Anteil; 0 = trägt nichts bei (Standard: 1 für alle).
+      </p>
     </fieldset>
 
     <p v-if="formError" class="error">{{ formError }}</p>

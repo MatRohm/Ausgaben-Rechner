@@ -88,6 +88,24 @@ describe('calculateSettlement', () => {
     expect(balance).toBe(0);
   });
 
+  it('ignores zero-weight participants and assigns rounding to positive weights', () => {
+    const result = calculateSettlement(persons, [
+      expense({
+        amountCents: 100,
+        participants: [
+          { personId: 1, weight: 1 },
+          { personId: 2, weight: 2 },
+          { personId: 3, weight: 0 },
+        ],
+      }),
+    ]);
+
+    expect(result.balances[2]).toMatchObject({ owedCents: 0, balanceCents: 0 });
+    expect(result.balances[1]).toMatchObject({ owedCents: 67, balanceCents: -67 });
+    expect(result.balances.reduce((sum, b) => sum + b.owedCents, 0)).toBe(100);
+    expect(result.balances.reduce((sum, b) => sum + b.balanceCents, 0)).toBe(0);
+  });
+
   it('ignores settled expenses for the balance and reports them separately', () => {
     const settled = expense({ id: 7, settled: true });
     const result = calculateSettlement(persons, [settled]);

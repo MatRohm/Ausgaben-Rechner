@@ -24,15 +24,16 @@ export function calculateSettlement(persons: Person[], expenses: Expense[]): Set
     paidMap.set(e.paidById, (paidMap.get(e.paidById) ?? 0) + e.amountCents);
     balanceMap.set(e.paidById, (balanceMap.get(e.paidById) ?? 0) + e.amountCents);
 
-    const totalWeight = e.participants.reduce((s, p) => s + p.weight, 0);
+    const participants = e.participants.filter((p) => p.weight > 0);
+    const totalWeight = participants.reduce((s, p) => s + p.weight, 0);
     if (totalWeight <= 0) continue;
 
     // Distribute the amount across participants, ensuring the shares sum exactly
     // to the amount (the last participant absorbs any rounding remainder).
     let remaining = e.amountCents;
-    for (let i = 0; i < e.participants.length; i++) {
-      const p = e.participants[i];
-      const isLast = i === e.participants.length - 1;
+    for (let i = 0; i < participants.length; i++) {
+      const p = participants[i];
+      const isLast = i === participants.length - 1;
       const share = isLast ? remaining : Math.floor((e.amountCents * p.weight) / totalWeight);
       owedMap.set(p.personId, (owedMap.get(p.personId) ?? 0) + share);
       balanceMap.set(p.personId, (balanceMap.get(p.personId) ?? 0) - share);

@@ -36,7 +36,7 @@ function parseExpenseInput(body: unknown): ExpenseInput | { error: string } {
     const pp = p as Record<string, unknown>;
     return {
       personId: Number(pp.personId),
-      weight: Number(pp.weight) || 1,
+      weight: Number(pp.weight),
     };
   });
 
@@ -45,10 +45,13 @@ function parseExpenseInput(body: unknown): ExpenseInput | { error: string } {
   }
   if (
     !parsedParticipants.every(
-      (p) => Number.isInteger(p.personId) && Number.isInteger(p.weight) && p.weight > 0,
+      (p) => Number.isInteger(p.personId) && Number.isInteger(p.weight) && p.weight >= 0,
     )
   ) {
     return { error: 'Ungültige Teilnehmerdaten.' };
+  }
+  if (!parsedParticipants.some((p) => p.weight > 0)) {
+    return { error: 'Mindestens ein Teilnehmer muss ein Gewicht größer als 0 haben.' };
   }
 
   return {
@@ -91,10 +94,13 @@ function parseImportInput(body: unknown): ExpenseImportInput | { error: string }
         Number.isInteger(p.personId) &&
         p.personId > 0 &&
         Number.isInteger(p.weight) &&
-        p.weight > 0,
+        p.weight >= 0,
     )
   ) {
     return { error: 'Ungültige Teilnehmerdaten.' };
+  }
+  if (!parsedParticipants.some((p) => p.weight > 0)) {
+    return { error: 'Mindestens ein Teilnehmer muss ein Gewicht größer als 0 haben.' };
   }
 
   if (expenses.length === 0) {

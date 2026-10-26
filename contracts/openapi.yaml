@@ -511,7 +511,7 @@ components:
           type: integer
         weight:
           type: integer
-          minimum: 1
+          minimum: 0
         name:
           type: string
 
@@ -526,7 +526,7 @@ components:
           type: integer
         weight:
           type: integer
-          minimum: 1
+          minimum: 0
 
     Expense:
       type: object
