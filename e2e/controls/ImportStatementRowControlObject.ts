@@ -1,7 +1,7 @@
 import { expect, type Locator } from '@playwright/test';
 import { ControlObject } from './ControlObject';
 
-export class ImportStatementRow extends ControlObject {
+export class ImportStatementRowControlObject extends ControlObject {
   async expectContains(text: string | RegExp): Promise<void> {
     await expect(this.root).toContainText(text);
   }

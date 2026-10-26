@@ -1,7 +1,7 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 import { ControlObject } from './ControlObject';
 
-export class ExpenseFormDialog extends ControlObject {
+export class ExpenseFormDialogControlObject extends ControlObject {
   constructor(page: Page) {
     super(page, page.locator('.expense-form'));
   }

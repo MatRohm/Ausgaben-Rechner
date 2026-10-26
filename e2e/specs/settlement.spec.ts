@@ -1,8 +1,9 @@
 import { test } from '../fixtures';
-import { SettlementPage } from '../pages/SettlementPage';
+import { SettlementPageObject } from '../pages/SettlementPageObject';
 import { createExpense, createPerson, createSettle, uniqueSuffix } from '../support';
 
 test('settlement shows balances and the minimal transfer', async ({ page, request, app }) => {
+  // ARRANGE
   const suffix = uniqueSuffix();
   const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);
   const bob = await createPerson(request, app.baseUrl, `Bob ${suffix}`);
@@ -15,11 +16,14 @@ test('settlement shows balances and the minimal transfer', async ({ page, reques
     participantIds: [alice.id, bob.id],
   });
 
-  const settlement = new SettlementPage(page, app.baseUrl);
+  const settlement = new SettlementPageObject(page, app.baseUrl);
+
+  // ACT
   await settlement.open();
   await settlement.selectSettle(settle.name);
-  await settlement.expectBalancesHeading();
 
+  // ASSERT
+  await settlement.expectBalancesHeading();
   const aliceBalance = settlement.balance(alice.name);
   await aliceBalance.expectBalance(/5,00\s*€/);
   await aliceBalance.expectPaid('10,00');

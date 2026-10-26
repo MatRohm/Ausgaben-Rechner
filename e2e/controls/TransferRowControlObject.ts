@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import { ControlObject } from './ControlObject';
 
-export class TransferRow extends ControlObject {
+export class TransferRowControlObject extends ControlObject {
   async expectFrom(name: string): Promise<void> {
     await expect(this.root.locator('.transfer-from')).toHaveText(name);
   }

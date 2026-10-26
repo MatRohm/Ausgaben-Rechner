@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import { ControlObject } from './ControlObject';
 
-export class BalanceRow extends ControlObject {
+export class BalanceRowControlObject extends ControlObject {
   async expectBalance(value: string | RegExp): Promise<void> {
     await expect(this.root.locator('.balance-amount')).toHaveText(value);
   }

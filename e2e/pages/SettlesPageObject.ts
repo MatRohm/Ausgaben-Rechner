@@ -1,8 +1,8 @@
 import { expect, type Page } from '@playwright/test';
-import { SettleCard } from '../controls/SettleCard';
+import { SettleCardControlObject } from '../controls/SettleCardControlObject';
 import { PageObject } from './PageObject';
 
-export class SettlesPage extends PageObject {
+export class SettlesPageObject extends PageObject {
   constructor(page: Page, baseUrl: string) {
     super(page, baseUrl);
   }
@@ -20,8 +20,11 @@ export class SettlesPage extends PageObject {
     await this.page.getByRole('button', { name: 'Neue Abrechnung' }).click();
   }
 
-  settle(name: string): SettleCard {
-    return new SettleCard(this.page, this.page.locator('.settle-card').filter({ hasText: name }));
+  settle(name: string): SettleCardControlObject {
+    return new SettleCardControlObject(
+      this.page,
+      this.page.locator('.settle-card').filter({ hasText: name }),
+    );
   }
 
   async expectSettleCount(name: string, count: number): Promise<void> {

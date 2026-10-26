@@ -1,8 +1,8 @@
 import { expect, type Page } from '@playwright/test';
-import { PersonRow } from '../controls/PersonRow';
+import { PersonRowControlObject } from '../controls/PersonRowControlObject';
 import { PageObject } from './PageObject';
 
-export class PersonsPage extends PageObject {
+export class PersonsPageObject extends PageObject {
   constructor(page: Page, baseUrl: string) {
     super(page, baseUrl);
   }
@@ -20,8 +20,11 @@ export class PersonsPage extends PageObject {
     await this.page.getByRole('button', { name: 'Hinzufügen' }).click();
   }
 
-  person(name: string): PersonRow {
-    return new PersonRow(this.page, this.page.locator('.person-row').filter({ hasText: name }));
+  person(name: string): PersonRowControlObject {
+    return new PersonRowControlObject(
+      this.page,
+      this.page.locator('.person-row').filter({ hasText: name }),
+    );
   }
 
   async expectPersonCount(name: string, count: number): Promise<void> {

@@ -1,8 +1,8 @@
 import { expect, type Page } from '@playwright/test';
 import { ControlObject } from './ControlObject';
-import { ImportStatementRow } from './ImportStatementRow';
+import { ImportStatementRowControlObject } from './ImportStatementRowControlObject';
 
-export class ImportStatementDialog extends ControlObject {
+export class ImportStatementDialogControlObject extends ControlObject {
   constructor(page: Page) {
     super(page, page.locator('.import-modal'));
   }
@@ -27,8 +27,11 @@ export class ImportStatementDialog extends ControlObject {
     await this.root.getByLabel('Kontoauszug (JSON)').setInputFiles(filePath);
   }
 
-  row(index: number): ImportStatementRow {
-    return new ImportStatementRow(this.page, this.root.locator('.import-row').nth(index));
+  row(index: number): ImportStatementRowControlObject {
+    return new ImportStatementRowControlObject(
+      this.page,
+      this.root.locator('.import-row').nth(index),
+    );
   }
 
   async expectRowCount(count: number): Promise<void> {

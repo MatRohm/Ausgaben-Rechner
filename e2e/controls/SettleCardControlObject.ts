@@ -3,7 +3,7 @@ import { ControlObject } from './ControlObject';
 
 export type SettleStatus = 'Offen' | 'Abgeschlossen';
 
-export class SettleCard extends ControlObject {
+export class SettleCardControlObject extends ControlObject {
   async expectStatus(status: SettleStatus): Promise<void> {
     await expect(this.root.getByText(status, { exact: true })).toBeVisible();
   }

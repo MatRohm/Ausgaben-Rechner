@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
 import { ControlObject } from './ControlObject';
 
-export class PersonRow extends ControlObject {
+export class PersonRowControlObject extends ControlObject {
   async expectVisible(): Promise<void> {
     await expect(this.root).toBeVisible();
   }

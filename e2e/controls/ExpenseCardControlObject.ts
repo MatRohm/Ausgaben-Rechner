@@ -1,8 +1,8 @@
 import { expect } from '@playwright/test';
 import { ControlObject } from './ControlObject';
-import { ExpenseFormDialog } from './ExpenseFormDialog';
+import { ExpenseFormDialogControlObject } from './ExpenseFormDialogControlObject';
 
-export class ExpenseCard extends ControlObject {
+export class ExpenseCardControlObject extends ControlObject {
   async expectVisible(): Promise<void> {
     await expect(this.root).toBeVisible();
   }
@@ -23,9 +23,9 @@ export class ExpenseCard extends ControlObject {
     await expect(this.root).toContainText(`Aufgeteilt auf: ${names.join(', ')}`);
   }
 
-  async openEdit(): Promise<ExpenseFormDialog> {
+  async openEdit(): Promise<ExpenseFormDialogControlObject> {
     await this.root.getByTitle('Bearbeiten').click();
-    const dialog = new ExpenseFormDialog(this.page);
+    const dialog = new ExpenseFormDialogControlObject(this.page);
     await dialog.expectEditHeading();
     return dialog;
   }
