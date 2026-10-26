@@ -1,4 +1,4 @@
-import { expect, type APIRequestContext, type Page } from '@playwright/test';
+import type { APIRequestContext } from '@playwright/test';
 
 interface Person {
   id: number;
@@ -71,17 +71,5 @@ export function createExpense(
     settleId: input.settleId,
     date: input.date ?? '2026-07-01',
     participants: participantIds.map((personId) => ({ personId, weight: 1 })),
-  });
-}
-
-export async function selectSettle(page: Page, name: string): Promise<void> {
-  const select = page.locator('.settle-select');
-  await expect(select).toContainText(name);
-  await select.selectOption({ label: name });
-}
-
-export function acceptDialogs(page: Page): void {
-  page.on('dialog', (dialog) => {
-    void dialog.accept();
   });
 }

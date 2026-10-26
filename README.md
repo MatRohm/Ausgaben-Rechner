@@ -104,6 +104,11 @@ Kontoauszug-Import ab. Fehlerberichte und Traces liegen nach einem Lauf unter
 `playwright-report/` bzw. `test-results/`. In der CI läuft zusätzlich ein
 separater `e2e`-Job.
 
+Die Tests sind thematisch unter `e2e/specs/` gruppiert. Seitenaktionen liegen in
+`e2e/pages/` (PageObjects), untergeordnete Elemente wie Dialoge, Zeilen und
+Karten in `e2e/controls/` (ControlObjects). Die Specs arbeiten ausschließlich
+mit diesen Objekten.
+
 ## Produktion (Docker)
 
 ```bash
