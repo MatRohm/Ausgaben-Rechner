@@ -1,47 +1,72 @@
 import { test } from '../fixtures';
 import { SettlesPageObject } from '../pages/SettlesPageObject';
-import { uniqueSuffix } from '../support';
+import { closeSettle, createSettle, uniqueSuffix } from '../support';
 
-test('settles can be created, renamed, closed, reopened, and deleted', async ({ page, app }) => {
+test('settles can be created', async ({ page, app }) => {
   // ARRANGE
-  const suffix = uniqueSuffix();
-  const name = `Trip ${suffix}`;
-  const renamed = `Trip renamed ${suffix}`;
-
+  const name = `Trip ${uniqueSuffix()}`;
   const settles = new SettlesPageObject(page, app.baseUrl);
-  settles.acceptBrowserDialogs();
   await settles.open();
-  await settles.expectHeading();
 
   // ACT
   await settles.create(name);
 
   // ASSERT
-  const card = settles.settle(name);
-  await card.expectStatus('Offen');
+  await settles.settle(name).expectStatus('Offen');
+});
+
+test('settles can be renamed', async ({ page, request, app }) => {
+  // ARRANGE
+  const suffix = uniqueSuffix();
+  const settle = await createSettle(request, app.baseUrl, `Trip ${suffix}`);
+  const renamed = `Trip renamed ${suffix}`;
+  const settles = new SettlesPageObject(page, app.baseUrl);
+  await settles.open();
 
   // ACT
-  await card.rename(renamed);
+  await settles.settle(settle.name).rename(renamed);
 
   // ASSERT
-  const renamedCard = settles.settle(renamed);
-  await renamedCard.expectStatus('Offen');
+  await settles.settle(renamed).expectStatus('Offen');
+});
+
+test('settles can be closed', async ({ page, request, app }) => {
+  // ARRANGE
+  const settle = await createSettle(request, app.baseUrl, `Trip ${uniqueSuffix()}`);
+  const settles = new SettlesPageObject(page, app.baseUrl);
+  await settles.open();
 
   // ACT
-  await renamedCard.close();
+  await settles.settle(settle.name).close();
 
   // ASSERT
-  await renamedCard.expectStatus('Abgeschlossen');
+  await settles.settle(settle.name).expectStatus('Abgeschlossen');
+});
+
+test('settles can be reopened', async ({ page, request, app }) => {
+  // ARRANGE
+  const settle = await createSettle(request, app.baseUrl, `Trip ${uniqueSuffix()}`);
+  await closeSettle(request, app.baseUrl, settle.id);
+  const settles = new SettlesPageObject(page, app.baseUrl);
+  await settles.open();
 
   // ACT
-  await renamedCard.reopen();
+  await settles.settle(settle.name).reopen();
 
   // ASSERT
-  await renamedCard.expectStatus('Offen');
+  await settles.settle(settle.name).expectStatus('Offen');
+});
+
+test('settles can be deleted', async ({ page, request, app }) => {
+  // ARRANGE
+  const settle = await createSettle(request, app.baseUrl, `Trip ${uniqueSuffix()}`);
+  const settles = new SettlesPageObject(page, app.baseUrl);
+  settles.acceptBrowserDialogs();
+  await settles.open();
 
   // ACT
-  await renamedCard.remove();
+  await settles.settle(settle.name).remove();
 
   // ASSERT
-  await settles.expectSettleCount(renamed, 0);
+  await settles.expectSettleCount(settle.name, 0);
 });

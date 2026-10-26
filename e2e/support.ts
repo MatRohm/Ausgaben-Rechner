@@ -25,6 +25,7 @@ interface ExpenseSeed {
   settleId: number;
   date?: string;
   participantIds?: number[];
+  participantWeights?: Record<number, number>;
 }
 
 let sequence = 0;
@@ -58,6 +59,14 @@ export function createSettle(
   return post<Settle>(request, `${baseUrl}/api/settles`, { name });
 }
 
+export function closeSettle(
+  request: APIRequestContext,
+  baseUrl: string,
+  settleId: number,
+): Promise<Settle> {
+  return post<Settle>(request, `${baseUrl}/api/settles/${settleId}/close`, {});
+}
+
 export function createExpense(
   request: APIRequestContext,
   baseUrl: string,
@@ -70,6 +79,9 @@ export function createExpense(
     paidById: input.paidById,
     settleId: input.settleId,
     date: input.date ?? '2026-07-01',
-    participants: participantIds.map((personId) => ({ personId, weight: 1 })),
+    participants: participantIds.map((personId) => ({
+      personId,
+      weight: input.participantWeights?.[personId] ?? 1,
+    })),
   });
 }

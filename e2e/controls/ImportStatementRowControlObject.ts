@@ -22,6 +22,14 @@ export class ImportStatementRowControlObject extends ControlObject {
     await this.checkbox().focus();
   }
 
+  async focusDescription(): Promise<void> {
+    await this.description().focus();
+  }
+
+  async focusAmount(): Promise<void> {
+    await this.amount().focus();
+  }
+
   async expectCheckboxFocused(): Promise<void> {
     await expect(this.checkbox()).toBeFocused();
   }

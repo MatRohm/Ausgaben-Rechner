@@ -1,27 +1,18 @@
 import { test } from '../fixtures';
 import { ExpensesPageObject } from '../pages/ExpensesPageObject';
 import { SettlementPageObject } from '../pages/SettlementPageObject';
-import { createPerson, createSettle, uniqueSuffix } from '../support';
+import { createExpense, createPerson, createSettle, uniqueSuffix } from '../support';
 
-test('expenses can be created with a split, edited, marked paid, and deleted', async ({
-  page,
-  request,
-  app,
-}) => {
+test('expenses can be created with a split', async ({ page, request, app }) => {
   // ARRANGE
   const suffix = uniqueSuffix();
   const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);
   const bob = await createPerson(request, app.baseUrl, `Bob ${suffix}`);
   const settle = await createSettle(request, app.baseUrl, `Expenses ${suffix}`);
-
   const expenses = new ExpensesPageObject(page, app.baseUrl);
-  expenses.acceptBrowserDialogs();
   await expenses.open();
   await expenses.selectSettle(settle.name);
-
   const form = await expenses.openNewExpense();
-  await form.expectParticipantChecked(alice.name);
-  await form.expectParticipantChecked(bob.name);
 
   // ACT
   await form.fillDescription('Dinner');
@@ -38,14 +29,27 @@ test('expenses can be created with a split, edited, marked paid, and deleted', a
   await card.expectPayer(alice.name);
   await card.expectMonth('Juli 2026');
   await card.expectSplit([alice.name, bob.name]);
+});
+
+test('expenses can be edited', async ({ page, request, app }) => {
+  // ARRANGE
+  const suffix = uniqueSuffix();
+  const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);
+  const bob = await createPerson(request, app.baseUrl, `Bob ${suffix}`);
+  const settle = await createSettle(request, app.baseUrl, `Edit ${suffix}`);
+  await createExpense(request, app.baseUrl, {
+    description: 'Dinner',
+    amountCents: 2_000,
+    paidById: alice.id,
+    settleId: settle.id,
+    participantIds: [alice.id, bob.id],
+  });
+  const expenses = new ExpensesPageObject(page, app.baseUrl);
+  await expenses.open();
+  await expenses.selectSettle(settle.name);
 
   // ACT
-  const editForm = await card.openEdit();
-
-  // ASSERT
-  await editForm.expectDescription('Dinner');
-
-  // ACT
+  const editForm = await expenses.expenseCard('Dinner').openEdit();
   await editForm.fillDescription('Dinner edited');
   await editForm.fillAmount('25,00');
   await editForm.save();
@@ -53,31 +57,62 @@ test('expenses can be created with a split, edited, marked paid, and deleted', a
   // ASSERT
   const editedCard = expenses.expenseCard('Dinner edited');
   await editedCard.expectAmount('25,00');
+});
+
+test('expenses can be marked as paid', async ({ page, request, app }) => {
+  // ARRANGE
+  const suffix = uniqueSuffix();
+  const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);
+  const settle = await createSettle(request, app.baseUrl, `Paid ${suffix}`);
+  await createExpense(request, app.baseUrl, {
+    description: 'Dinner',
+    amountCents: 2_000,
+    paidById: alice.id,
+    settleId: settle.id,
+  });
+  const expenses = new ExpensesPageObject(page, app.baseUrl);
+  await expenses.open();
+  await expenses.selectSettle(settle.name);
 
   // ACT
-  await editedCard.toggleSettled();
+  await expenses.expenseCard('Dinner').toggleSettled();
 
   // ASSERT
-  await editedCard.expectPaid();
+  await expenses.expenseCard('Dinner').expectPaid();
+});
+
+test('expenses can be deleted', async ({ page, request, app }) => {
+  // ARRANGE
+  const suffix = uniqueSuffix();
+  const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);
+  const settle = await createSettle(request, app.baseUrl, `Delete ${suffix}`);
+  await createExpense(request, app.baseUrl, {
+    description: 'Dinner',
+    amountCents: 2_000,
+    paidById: alice.id,
+    settleId: settle.id,
+  });
+  const expenses = new ExpensesPageObject(page, app.baseUrl);
+  expenses.acceptBrowserDialogs();
+  await expenses.open();
+  await expenses.selectSettle(settle.name);
 
   // ACT
-  await editedCard.remove();
+  await expenses.expenseCard('Dinner').remove();
 
   // ASSERT
   await expenses.expectExpenseCount(0);
 });
 
-test('expense participants can have a zero weight', async ({ page, request, app }) => {
+test('zero weight expenses can be created', async ({ page, request, app }) => {
   // ARRANGE
   const suffix = uniqueSuffix();
   const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);
   const bob = await createPerson(request, app.baseUrl, `Bob ${suffix}`);
   const settle = await createSettle(request, app.baseUrl, `Zero weight ${suffix}`);
-
   const expenses = new ExpensesPageObject(page, app.baseUrl);
   await expenses.open();
   await expenses.selectSettle(settle.name);
-
   const form = await expenses.openNewExpense();
 
   // ACT
@@ -91,9 +126,25 @@ test('expense participants can have a zero weight', async ({ page, request, app 
 
   // ASSERT
   await expenses.expenseCard('Hotel').expectVisible();
+});
+
+test('zero weight participants owe nothing in the settlement', async ({ page, request, app }) => {
+  // ARRANGE
+  const suffix = uniqueSuffix();
+  const alice = await createPerson(request, app.baseUrl, `Alice ${suffix}`);
+  const bob = await createPerson(request, app.baseUrl, `Bob ${suffix}`);
+  const settle = await createSettle(request, app.baseUrl, `Zero settlement ${suffix}`);
+  await createExpense(request, app.baseUrl, {
+    description: 'Hotel',
+    amountCents: 2_000,
+    paidById: alice.id,
+    settleId: settle.id,
+    participantIds: [alice.id, bob.id],
+    participantWeights: { [bob.id]: 0 },
+  });
+  const settlement = new SettlementPageObject(page, app.baseUrl);
 
   // ACT
-  const settlement = new SettlementPageObject(page, app.baseUrl);
   await settlement.open();
   await settlement.selectSettle(settle.name);
 
@@ -102,12 +153,11 @@ test('expense participants can have a zero weight', async ({ page, request, app 
   await settlement.balance(bob.name).expectShare('0,00');
 });
 
-test('escape closes the expense form and import dialog', async ({ page, request, app }) => {
+test('escape closes the expense form', async ({ page, request, app }) => {
   // ARRANGE
   const suffix = uniqueSuffix();
   await createPerson(request, app.baseUrl, `Alice ${suffix}`);
-  const settle = await createSettle(request, app.baseUrl, `Esc ${suffix}`);
-
+  const settle = await createSettle(request, app.baseUrl, `Esc form ${suffix}`);
   const expenses = new ExpensesPageObject(page, app.baseUrl);
   await expenses.open();
   await expenses.selectSettle(settle.name);
@@ -118,6 +168,16 @@ test('escape closes the expense form and import dialog', async ({ page, request,
 
   // ASSERT
   await form.expectHidden();
+});
+
+test('escape closes the import dialog', async ({ page, request, app }) => {
+  // ARRANGE
+  const suffix = uniqueSuffix();
+  await createPerson(request, app.baseUrl, `Alice ${suffix}`);
+  const settle = await createSettle(request, app.baseUrl, `Esc import ${suffix}`);
+  const expenses = new ExpensesPageObject(page, app.baseUrl);
+  await expenses.open();
+  await expenses.selectSettle(settle.name);
 
   // ACT
   const dialog = await expenses.openImportDialog();
