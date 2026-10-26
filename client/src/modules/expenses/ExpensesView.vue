@@ -213,7 +213,7 @@ async function handleImported() {
       </li>
     </ul>
 
-    <div v-if="showForm" class="modal-backdrop" @click.self="showForm = false">
+    <div v-if="showForm" class="modal-backdrop">
       <div class="modal">
         <ExpenseForm
           :persons="persons"

@@ -126,7 +126,17 @@ function submitNew() {
 
 <template>
   <form class="expense-form" @submit.prevent="submit">
-    <h2 class="form-title">{{ expense ? 'Ausgabe bearbeiten' : 'Neue Ausgabe' }}</h2>
+    <div class="modal-heading">
+      <h2 class="form-title">{{ expense ? 'Ausgabe bearbeiten' : 'Neue Ausgabe' }}</h2>
+      <button
+        type="button"
+        class="icon-btn modal-close"
+        aria-label="Dialog schließen"
+        @click="emit('cancel')"
+      >
+        ✕
+      </button>
+    </div>
 
     <label class="field">
       <span>Beschreibung</span>

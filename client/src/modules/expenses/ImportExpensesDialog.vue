@@ -204,9 +204,19 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <div class="modal-backdrop" @click.self="emit('close')">
+  <div class="modal-backdrop">
     <form class="modal import-modal" @submit.prevent="submit">
-      <h2 class="form-title">Aus Kontoauszug importieren</h2>
+      <div class="modal-heading">
+        <h2 class="form-title">Aus Kontoauszug importieren</h2>
+        <button
+          type="button"
+          class="icon-btn modal-close"
+          aria-label="Dialog schließen"
+          @click="emit('close')"
+        >
+          ✕
+        </button>
+      </div>
 
       <label class="field">
         <span>Bezahlt von</span>
