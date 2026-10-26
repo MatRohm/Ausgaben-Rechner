@@ -1,7 +1,8 @@
 # API contract
 
 `contracts/openapi.yaml` is the source of truth for the REST API shared by the
-Vue client and the Express server.
+Vue client and the Express server. Swagger UI is served at `/api` and loads the
+document from `/api/openapi.yaml`.
 
 ## Generated client types
 

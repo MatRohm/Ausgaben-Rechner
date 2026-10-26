@@ -7,6 +7,7 @@ import { expensesRouter } from '../modules/expenses/index.js';
 import { personsRouter } from '../modules/persons/index.js';
 import { settlementRouter } from '../modules/settlement/index.js';
 import { settlesRouter } from '../modules/settles/index.js';
+import { registerApiDocs } from './swagger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -19,6 +20,8 @@ export function createApp(): express.Express {
 
   app.use(cors());
   app.use(express.json());
+
+  registerApiDocs(app);
 
   app.use('/api/persons', personsRouter);
   app.use('/api/expenses', expensesRouter);

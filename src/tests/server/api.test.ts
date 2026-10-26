@@ -261,4 +261,19 @@ describe('REST API', () => {
     expect(response.status).toBe(400);
     expect(response.body).toMatchObject({ error: expect.stringMatching(/abgeschlossen/) });
   });
+
+  it('serves Swagger UI, its assets, and the OpenAPI document at the API root', async () => {
+    const docs = await fetch(`${server.baseUrl}/api`);
+    expect(docs.status).toBe(200);
+    expect(docs.headers.get('content-type')).toContain('text/html');
+    expect(await docs.text()).toContain('SwaggerUIBundle');
+
+    const spec = await fetch(`${server.baseUrl}/api/openapi.yaml`);
+    expect(spec.status).toBe(200);
+    expect(await spec.text()).toContain('openapi: 3.1.0');
+
+    const asset = await fetch(`${server.baseUrl}/api/swagger-ui/swagger-ui.css`);
+    expect(asset.status).toBe(200);
+    expect(asset.headers.get('content-type')).toContain('text/css');
+  });
 });

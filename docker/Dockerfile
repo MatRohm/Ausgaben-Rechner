@@ -28,6 +28,9 @@ RUN npm install --omit=dev && npm cache clean --force
 COPY --from=build /app/src/server/dist src/server/dist
 COPY --from=build /app/src/client/dist src/client/dist
 
+# OpenAPI document served by Swagger UI
+COPY contracts contracts
+
 ENV PORT=3000
 ENV DATA_DIR=/app/data
 EXPOSE 3000

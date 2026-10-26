@@ -49,6 +49,7 @@ npm run dev
 
 - Frontend: http://localhost:5173 (proxied `/api` → Backend)
 - Backend/API: http://localhost:3005
+- API-Dokumentation (Swagger UI): http://localhost:3005/api
 
 Ist der Standardport belegt, kann ein anderer Port gesetzt werden. `PORT`
 steuert sowohl den API-Server als auch das Ziel des Vite-Dev-Proxys:
