@@ -78,7 +78,6 @@ jobs:
           args: --latest --strip header
         env:
           OUTPUT: release-notes.md
-          GITHUB_REPO: ${{ github.repository }}
 
       - name: Add repository links and Docker instructions
         run: |
